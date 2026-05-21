@@ -38,6 +38,7 @@ android {
         compose = true
     }
 }
+val samsungHealthSensorSdkPath = "libs/samsung-health-sensor-api-1.4.1.aar"
 
 dependencies {
     implementation(platform(libs.compose.bom))
@@ -51,6 +52,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.wear.tooling.preview)
+    implementation(files(samsungHealthSensorSdkPath))
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.test.manifest)
