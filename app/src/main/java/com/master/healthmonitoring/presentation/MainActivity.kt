@@ -18,14 +18,27 @@ import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.lazy.rememberTransformationSpec
 import androidx.wear.compose.material3.lazy.transformedHeight
 import com.master.healthmonitoring.R
+import com.master.healthmonitoring.core.HealthTrackingManager
 import com.master.healthmonitoring.presentation.theme.HealthMonitoringTheme
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var healthTrackingManager: HealthTrackingManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        healthTrackingManager = HealthTrackingManager(this)
+        healthTrackingManager.connect()
+
         setContent {
             WearApp("Android")
         }
+    }
+
+    override fun onDestroy() {
+        healthTrackingManager.disconnect()
+        super.onDestroy()
     }
 }
 
