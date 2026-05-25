@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -38,6 +41,13 @@ android {
         compose = true
     }
 }
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+    }
+}
+
 val samsungHealthSensorSdkPath = "libs/samsung-health-sensor-api-1.4.1.aar"
 
 dependencies {
@@ -53,8 +63,10 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.wear.tooling.preview)
     implementation(files(samsungHealthSensorSdkPath))
+    implementation(libs.hilt.android)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.test.manifest)
     debugImplementation(libs.ui.tooling)
+    ksp(libs.hilt.compiler)
 }

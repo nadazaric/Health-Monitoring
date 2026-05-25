@@ -1,4 +1,4 @@
-package com.master.healthmonitoring.presentation
+package com.master.healthmonitoring
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -17,19 +17,20 @@ import androidx.wear.compose.material3.SurfaceTransformation
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.lazy.rememberTransformationSpec
 import androidx.wear.compose.material3.lazy.transformedHeight
-import com.master.healthmonitoring.R
-import com.master.healthmonitoring.core.HealthTrackingManager
-import com.master.healthmonitoring.presentation.theme.HealthMonitoringTheme
+import com.master.healthmonitoring.core.HealthTrackerProvider
+import com.master.healthmonitoring.ui.theme.HealthMonitoringTheme
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private lateinit var healthTrackingManager: HealthTrackingManager
+    @Inject
+    lateinit var healthTrackerProvider: HealthTrackerProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        healthTrackingManager = HealthTrackingManager(this)
-        healthTrackingManager.connect()
+        healthTrackerProvider.connect()
 
         setContent {
             WearApp("Android")
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        healthTrackingManager.disconnect()
+        healthTrackerProvider.disconnect()
         super.onDestroy()
     }
 }

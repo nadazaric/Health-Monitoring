@@ -1,4 +1,4 @@
-package com.master.healthmonitoring.presentation.theme
+package com.master.healthmonitoring.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material3.MaterialTheme
