@@ -5,6 +5,7 @@ import android.os.Looper
 import android.util.Log
 import com.master.healthmonitoring.consts.Tags
 import com.master.healthmonitoring.core.HealthTrackerProvider
+import com.master.healthmonitoring.feature.heartrate.domain.model.HeartRateMeasurement
 import com.samsung.android.service.health.tracking.HealthTracker
 import com.samsung.android.service.health.tracking.data.DataPoint
 import com.samsung.android.service.health.tracking.data.HealthTrackerType
@@ -19,6 +20,8 @@ class HeartRateListener @Inject constructor(
     private var heartRateTracker: HealthTracker? = null
 
     private val heartRateHandler = Handler(Looper.getMainLooper())
+
+    private var onHeartRateChangedCallback: ((HeartRateMeasurement) -> Unit)? = null
 
     private val trackerEventListener = object : HealthTracker.TrackerEventListener {
 
@@ -36,6 +39,16 @@ class HeartRateListener @Inject constructor(
                     Tags.HEART_RATE_LISTENER,
                     "Heart rate received. BPM: $heartRate, status: $status, timestamp: ${dataPoint.timestamp}"
                 )
+
+                if (status == 1) {
+                    val measurement = HeartRateMeasurement(
+                        bpm = heartRate,
+                        status = status,
+                        timestamp = dataPoint.timestamp
+                    )
+
+                    onHeartRateChangedCallback?.invoke(measurement)
+                }
             }
         }
 
@@ -79,6 +92,12 @@ class HeartRateListener @Inject constructor(
             heartRateTracker?.unsetEventListener()
             heartRateTracker = null
         }
+    }
+
+    fun setOnHeartRateChangedCallback(
+        callback: (HeartRateMeasurement) -> Unit
+    ) {
+        onHeartRateChangedCallback = callback
     }
 
 }

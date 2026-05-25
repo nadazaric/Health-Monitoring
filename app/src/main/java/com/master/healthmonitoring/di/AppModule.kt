@@ -2,6 +2,8 @@ package com.master.healthmonitoring.di
 
 import com.master.healthmonitoring.core.HealthTrackerProvider
 import com.master.healthmonitoring.core.HealthTrackerProviderImpl
+import com.master.healthmonitoring.feature.heartrate.data.repository.HeartRateRepositoryImpl
+import com.master.healthmonitoring.feature.heartrate.domain.repository.HeartRateRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -12,10 +14,18 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class HealthTrackingModule {
 
+    // Trackers
     @Binds
     @Singleton
     abstract fun bindHealthTrackerProvider(
         healthTrackerProviderImpl: HealthTrackerProviderImpl
     ): HealthTrackerProvider
+
+    // Repositories
+    @Binds
+    @Singleton
+    abstract fun bindHeartRateRepository(
+        heartRateRepositoryImpl: HeartRateRepositoryImpl
+    ): HeartRateRepository
 
 }
