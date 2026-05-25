@@ -18,8 +18,7 @@ class HealthTrackerProviderImpl @Inject constructor(
 ) : HealthTrackerProvider {
     private var healthTrackingService: HealthTrackingService? = null
     private var connected = false
-
-    var onConnected: (() -> Unit)? = null
+    private var onConnectedCallback: (() -> Unit)? = null
 
     private val connectionListener = object : ConnectionListener {
 
@@ -30,7 +29,7 @@ class HealthTrackerProviderImpl @Inject constructor(
 
             logSupportedTrackers()
 
-            onConnected?.invoke()
+            onConnectedCallback?.invoke()
         }
 
         override fun onConnectionEnded() {
@@ -151,6 +150,10 @@ class HealthTrackerProviderImpl @Inject constructor(
         supportedTrackers.forEach { trackerType ->
             Log.i(Tags.HEALTH_TRACKING_MANAGER, "Supported tracker: $trackerType")
         }
+    }
+
+    override fun setOnConnectedCallback(callback: () -> Unit) {
+        onConnectedCallback = callback
     }
 
 }

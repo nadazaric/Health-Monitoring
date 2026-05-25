@@ -15,4 +15,6 @@ interface HealthTrackerProvider {
 
     fun getTracker(healthTrackerType: HealthTrackerType): HealthTracker?
 
+    fun setOnConnectedCallback(callback: () -> Unit)
+
 }
