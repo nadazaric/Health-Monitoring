@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Health Monitoring</string>
-    <string name="hello_world">Hello, %1$s!</string>
+
+    <!--  heart rate  -->
+    <string name="heart_rate_description">Heart rate</string>
+    <string name="heart_rate_value">%1$d BPM</string>
+    <string name="heart_rate_unavailable">--- BPM</string>
+
 </resources>

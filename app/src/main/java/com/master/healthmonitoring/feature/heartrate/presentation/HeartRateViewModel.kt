@@ -25,29 +25,19 @@ class HeartRateViewModel @Inject constructor(
 
     fun onEvent(event: HeartRateEvent) {
         when (event) {
-            is HeartRateEvent.StartTracking -> {
-                _state.value = _state.value.copy(
-                    isTracking = true,
-                    errorMessage = null
-                )
+            is HeartRateEvent.MonitoringStarted -> _state.value = _state.value.copy(
+                isTracking = true,
+                errorMessage = null
+            )
 
-                useCases.startHeartRateTracking()
-            }
+            is HeartRateEvent.MonitoringStopped -> _state.value = _state.value.copy(
+                isTracking = false
+            )
 
-            is HeartRateEvent.StopTracking -> {
-                useCases.stopHeartRateTracking()
-
-                _state.value = _state.value.copy(
-                    isTracking = false
-                )
-            }
-
-            is HeartRateEvent.PermissionDenied -> {
-                _state.value = _state.value.copy(
-                    isTracking = false,
-                    errorMessage = "Heart rate permission denied."
-                )
-            }
+            is HeartRateEvent.PermissionDenied -> _state.value = _state.value.copy(
+                isTracking = false,
+                errorMessage = "Heart rate permission denied."
+            )
         }
     }
 
@@ -62,10 +52,5 @@ class HeartRateViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    override fun onCleared() {
-        useCases.stopHeartRateTracking()
-        super.onCleared()
     }
 }

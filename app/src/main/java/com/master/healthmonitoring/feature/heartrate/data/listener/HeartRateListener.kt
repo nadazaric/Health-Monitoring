@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.master.healthmonitoring.consts.Tags
+import com.master.healthmonitoring.consts.Timing
 import com.master.healthmonitoring.core.HealthTrackerProvider
 import com.master.healthmonitoring.feature.heartrate.domain.model.HeartRateMeasurement
 import com.samsung.android.service.health.tracking.HealthTracker
@@ -22,6 +23,17 @@ class HeartRateListener @Inject constructor(
     private val heartRateHandler = Handler(Looper.getMainLooper())
 
     private var onHeartRateChangedCallback: ((HeartRateMeasurement) -> Unit)? = null
+
+    private val flushRunnable = object : Runnable {
+        override fun run() {
+            flushHeartRateData()
+
+            heartRateHandler.postDelayed(
+                this,
+                Timing.FLUSH_INTERVAL_MS
+            )
+        }
+    }
 
     private val trackerEventListener = object : HealthTracker.TrackerEventListener {
 
@@ -82,6 +94,7 @@ class HeartRateListener @Inject constructor(
             Log.i(Tags.HEART_RATE_LISTENER, "Starting heart rate tracking.")
 
             heartRateTracker?.setEventListener(trackerEventListener)
+            startPeriodicFlush()
         }
     }
 
@@ -90,6 +103,7 @@ class HeartRateListener @Inject constructor(
             Log.i(Tags.HEART_RATE_LISTENER, "Stopping heart rate tracking.")
 
             heartRateTracker?.unsetEventListener()
+            stopPeriodicFlush()
             heartRateTracker = null
         }
     }
@@ -98,6 +112,45 @@ class HeartRateListener @Inject constructor(
         callback: (HeartRateMeasurement) -> Unit
     ) {
         onHeartRateChangedCallback = callback
+    }
+
+    private fun startPeriodicFlush() {
+        Log.d(
+            Tags.HEART_RATE_LISTENER,
+            "Starting periodic heart rate flush."
+        )
+
+        heartRateHandler.removeCallbacks(flushRunnable)
+        heartRateHandler.postDelayed(
+            flushRunnable,
+            Timing.FLUSH_INTERVAL_MS
+        )
+    }
+
+    private fun stopPeriodicFlush() {
+        Log.d(
+            Tags.HEART_RATE_LISTENER,
+            "Stopping periodic heart rate flush."
+        )
+
+        heartRateHandler.removeCallbacks(flushRunnable)
+    }
+
+    private fun flushHeartRateData() {
+        try {
+            Log.i(
+                Tags.HEART_RATE_LISTENER,
+                "Flushing heart rate data."
+            )
+
+            heartRateTracker?.flush()
+        } catch (exception: Exception) {
+            Log.e(
+                Tags.HEART_RATE_LISTENER,
+                "Heart rate flush failed.",
+                exception
+            )
+        }
     }
 
 }
