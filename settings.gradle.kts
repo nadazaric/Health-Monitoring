@@ -24,4 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Health Monitoring"
 include(":wear")
- 
+include(":mobile")
