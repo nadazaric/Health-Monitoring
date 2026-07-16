@@ -14,8 +14,8 @@
 .cxx
 local.properties
 # Samsung Health Sensor SDK
-app/libs/*.aar
-!app/libs/.gitkeep
+wear/libs/*.aar
+!wear/libs/.gitkeep
 
 .idea/markdown.xml
 .idea/codeStyles/
