@@ -1,12 +1,8 @@
-package com.healthmonitoring.mobile.core.datalayer
+package com.healthmonitoring.mobile.feature.heartrate.domain.repository
 
 import com.healthmonitoring.mobile.feature.heartrate.domain.model.HeartRateMeasurement
 import kotlinx.coroutines.flow.Flow
 
-interface HealthDataReceiver {
+interface HeartRateRepository {
     fun observeHeartRate(): Flow<HeartRateMeasurement>
-
-    fun startListening()
-
-    fun stopListening()
 }

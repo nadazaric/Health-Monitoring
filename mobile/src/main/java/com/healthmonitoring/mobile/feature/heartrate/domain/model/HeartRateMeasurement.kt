@@ -1,4 +1,4 @@
-package com.healthmonitoring.mobile.core.datalayer.model
+package com.healthmonitoring.mobile.feature.heartrate.domain.model
 
 data class HeartRateMeasurement(
     val bpm: Int,

@@ -9,10 +9,13 @@ import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import com.healthmonitoring.mobile.consts.Tags
-import com.healthmonitoring.mobile.core.datalayer.model.HeartRateMeasurement
-import javax.inject.Singleton
-import javax.inject.Inject
+import com.healthmonitoring.mobile.feature.heartrate.domain.model.HeartRateMeasurement
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class HealthDataReceiverImpl @Inject constructor(
@@ -21,30 +24,41 @@ class HealthDataReceiverImpl @Inject constructor(
 
     private val applicationContext = context.applicationContext
 
-    private var onHeartRateReceived: ((HeartRateMeasurement) -> Unit)? = null
-    private var onNoHeartRateDataFound: (() -> Unit)? = null
+    private val heartRateMeasurements = MutableSharedFlow<HeartRateMeasurement>(
+        replay = 1
+    )
 
-    override fun startListening(
-        onHeartRateReceived: (HeartRateMeasurement) -> Unit,
-        onNoHeartRateDataFound: () -> Unit
-    ) {
-        this.onHeartRateReceived = onHeartRateReceived
-        this.onNoHeartRateDataFound = onNoHeartRateDataFound
+    private var isListening = false
+
+    override fun observeHeartRate(): Flow<HeartRateMeasurement> {
+        return heartRateMeasurements.asSharedFlow()
+    }
+
+    override fun startListening() {
+        if (isListening) {
+            Log.d(Tags.DATA_LAYER, "Health data receiver is already listening.")
+            return
+        }
+
+        isListening = true
 
         Wearable.getDataClient(applicationContext).addListener(this)
 
-        Log.d(Tags.DATA_LAYER, "Data layer live listener registered.")
+        Log.d(Tags.DATA_LAYER, "Health data receiver listener registered.")
 
         readLatestHeartRate()
     }
 
     override fun stopListening() {
+        if (!isListening) {
+            return
+        }
+
         Wearable.getDataClient(applicationContext).removeListener(this)
 
-        Log.d(Tags.DATA_LAYER, "Data layer live listener removed.")
+        isListening = false
 
-        onHeartRateReceived = null
-        onNoHeartRateDataFound = null
+        Log.d(Tags.DATA_LAYER, "Health data receiver listener removed.")
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
@@ -64,24 +78,19 @@ class HealthDataReceiverImpl @Inject constructor(
             .getDataItems()
             .addOnSuccessListener { dataItems ->
                 try {
-                    var latestValueFound = false
-
                     dataItems.forEach { dataItem ->
-                        if (dataItem.uri.path == DataLayerConstants.HEART_RATE_LATEST_PATH) {
-                            handleHeartRateDataItem(dataItem)
-                            latestValueFound = true
-                        }
-                    }
-
-                    if (!latestValueFound) {
-                        onNoHeartRateDataFound?.invoke()
+                        handleHeartRateDataItem(dataItem)
                     }
                 } finally {
                     dataItems.release()
                 }
             }
             .addOnFailureListener { exception ->
-                Log.e(Tags.DATA_LAYER, "Failed to read latest heart rate data item.", exception)
+                Log.e(
+                    Tags.DATA_LAYER,
+                    "Failed to read latest heart rate data item.",
+                    exception
+                )
             }
     }
 
@@ -98,11 +107,11 @@ class HealthDataReceiverImpl @Inject constructor(
             timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
         )
 
+        val emitted = heartRateMeasurements.tryEmit(measurement)
+
         Log.d(
             Tags.DATA_LAYER,
-            "BPM: ${measurement.bpm}, status: ${measurement.status}, timestamp: ${measurement.timestamp}"
+            "BPM: ${measurement.bpm}, emitted: $emitted"
         )
-
-        onHeartRateReceived?.invoke(measurement)
     }
 }
