@@ -2,6 +2,7 @@ package com.healthmonitoring.wear.feature.heartrate.data.repository
 
 import android.util.Log
 import com.healthmonitoring.wear.consts.Tags
+import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSender
 import com.healthmonitoring.wear.feature.heartrate.data.listener.HeartRateListener
 import com.healthmonitoring.wear.feature.heartrate.domain.model.HeartRateMeasurement
 import com.healthmonitoring.wear.feature.heartrate.domain.repository.HeartRateRepository
@@ -13,7 +14,8 @@ import javax.inject.Singleton
 
 @Singleton
 class HeartRateRepositoryImpl @Inject constructor(
-    private val heartRateListener: HeartRateListener
+    private val heartRateListener: HeartRateListener,
+    private val healthDataMessageSender: HealthDataMessageSender
 ) : HeartRateRepository {
 
     private val heartRateMeasurements = MutableSharedFlow<HeartRateMeasurement>(
@@ -28,6 +30,8 @@ class HeartRateRepositoryImpl @Inject constructor(
                 Tags.HEART_RATE_REPOSITORY,
                 "Heart rate measurement emitted. BPM: ${measurement.bpm}, status: ${measurement.status}, emitted: $emitted"
             )
+
+            healthDataMessageSender.sendHeartRateMeasurement(measurement)
         }
     }
 

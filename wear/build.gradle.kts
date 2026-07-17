@@ -15,7 +15,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.healthmonitoring.wear"
+        applicationId = "com.healthmonitoring"
         minSdk = 30
         targetSdk = 36
         versionCode = 1

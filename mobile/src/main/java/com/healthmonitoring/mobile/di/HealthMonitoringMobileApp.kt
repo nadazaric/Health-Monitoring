@@ -1,7 +1,7 @@
-package com.healthmonitoring.wear.di
+package com.healthmonitoring.mobile.di
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class HealthMonitoringApp : Application()
+class HealthMonitoringMobileApp : Application()

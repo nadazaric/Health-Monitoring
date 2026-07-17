@@ -49,7 +49,7 @@ class HeartRateListener @Inject constructor(
 
                 Log.i(
                     Tags.HEART_RATE_LISTENER,
-                    "Heart rate received. BPM: $heartRate, status: $status, timestamp: ${dataPoint.timestamp}"
+                    "BPM: $heartRate, status: $status, timestamp: ${dataPoint.timestamp}"
                 )
 
                 if (status == 1) {

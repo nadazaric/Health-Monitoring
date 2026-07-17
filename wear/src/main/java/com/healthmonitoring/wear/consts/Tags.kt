@@ -11,4 +11,7 @@ object Tags {
     const val HEART_RATE_LISTENER = "HeartRateListener"
     const val HEART_RATE_REPOSITORY = "HeartRateRepository"
 
+    // DataLayer
+    const val DATA_LAYER = "DataLayer"
+
 }
