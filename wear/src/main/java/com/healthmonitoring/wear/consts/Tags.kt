@@ -11,6 +11,10 @@ object Tags {
     const val HEART_RATE_LISTENER = "HeartRateListener"
     const val HEART_RATE_REPOSITORY = "HeartRateRepository"
 
+    // Skin Temperature
+    const val SKIN_TEMPERATURE_LISTENER = "SkinTemperatureListener"
+    const val SKIN_TEMPERATURE_REPOSITORY = "SkinTemperatureRepository"
+
     // DataLayer
     const val DATA_LAYER = "DataLayer"
 

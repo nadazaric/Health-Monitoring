@@ -18,6 +18,7 @@ import com.healthmonitoring.wear.R
 import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.core.HealthTrackerProvider
 import com.healthmonitoring.wear.feature.heartrate.domain.use_case.HeartRateUseCases
+import com.healthmonitoring.wear.feature.skin_temperature.domain.use_case.SkinTemperatureUseCases
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -29,6 +30,9 @@ class SensorTrackingService : Service() {
 
     @Inject
     lateinit var heartRateUseCases: HeartRateUseCases
+
+    @Inject
+    lateinit var skinTemperatureUseCases: SkinTemperatureUseCases
 
     private var isTrackingStarted = false
     private var areSensorsStarted = false
@@ -86,6 +90,8 @@ class SensorTrackingService : Service() {
         Log.d(Tags.SENSOR_TRACKING_SERVICE, "Stopping sensor tracking service.")
 
         heartRateUseCases.stopHeartRateTracking()
+        skinTemperatureUseCases.stopSkinTemperatureTracking()
+
         healthTrackerProvider.disconnect()
         releaseWakeLock()
 
@@ -126,6 +132,8 @@ class SensorTrackingService : Service() {
         Log.d(Tags.SENSOR_TRACKING_SERVICE, "Sensor tracking service destroyed.")
 
         heartRateUseCases.stopHeartRateTracking()
+        skinTemperatureUseCases.stopSkinTemperatureTracking()
+
         healthTrackerProvider.disconnect()
         releaseWakeLock()
 
@@ -156,6 +164,7 @@ class SensorTrackingService : Service() {
         areSensorsStarted = true
 
         heartRateUseCases.startHeartRateTracking()
+        skinTemperatureUseCases.startSkinTemperatureTracking()
     }
 
     @SuppressLint("WakelockTimeout")

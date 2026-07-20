@@ -2,8 +2,13 @@
     <string name="app_name">Health Monitoring</string>
 
     <!--  heart rate  -->
-    <string name="heart_rate_description">Heart rate</string>
+    <string name="heart_rate_description">Heart Rate</string>
     <string name="heart_rate_value">%1$d BPM</string>
-    <string name="heart_rate_unavailable">--- BPM</string>
+    <string name="heart_rate_unavailable">-- BPM</string>
+
+    <!--  heart rate  -->
+    <string name="skin_temperature_description">Skin Temperature</string>
+    <string name="skin_temperature_value">%1$.1f °C</string>
+    <string name="skin_temperature_unavailable">-- °C</string>
 
 </resources>

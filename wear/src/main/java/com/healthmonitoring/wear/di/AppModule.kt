@@ -6,6 +6,8 @@ import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSender
 import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSenderImpl
 import com.healthmonitoring.wear.feature.heartrate.data.repository.HeartRateRepositoryImpl
 import com.healthmonitoring.wear.feature.heartrate.domain.repository.HeartRateRepository
+import com.healthmonitoring.wear.feature.skin_temperature.data.repository.SkinTemperatureRepositoryImpl
+import com.healthmonitoring.wear.feature.skin_temperature.domain.repository.SkinTemperatureRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -29,6 +31,12 @@ abstract class HealthTrackingModule {
     abstract fun bindHeartRateRepository(
         heartRateRepositoryImpl: HeartRateRepositoryImpl
     ): HeartRateRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSkinTemperatureRepository(
+        skinTemperatureRepositoryImpl: SkinTemperatureRepositoryImpl
+    ): SkinTemperatureRepository
 
     // Communication
     @Binds

@@ -13,6 +13,7 @@ import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.AppScaffold
 import com.healthmonitoring.wear.core.presentation.MonitoringHost
 import com.healthmonitoring.wear.feature.heartrate.presentation.component.HeartRateCard
+import com.healthmonitoring.wear.feature.skin_temperature.presentation.component.SkinTemperatureCard
 import com.healthmonitoring.wear.ui.theme.Dimens
 import com.healthmonitoring.wear.ui.theme.HealthMonitoringTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -49,6 +50,12 @@ fun WearApp() {
                 ) {
                     item {
                         HeartRateCard(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    item {
+                        SkinTemperatureCard(
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

@@ -4,6 +4,8 @@ import com.healthmonitoring.mobile.core.datalayer.HealthDataReceiver
 import com.healthmonitoring.mobile.core.datalayer.HealthDataReceiverImpl
 import com.healthmonitoring.mobile.feature.heartrate.data.repository.HeartRateRepositoryImpl
 import com.healthmonitoring.mobile.feature.heartrate.domain.repository.HeartRateRepository
+import com.healthmonitoring.mobile.feature.skin_temperature.data.repository.SkinTemperatureRepositoryImpl
+import com.healthmonitoring.mobile.feature.skin_temperature.domain.repository.SkinTemperatureRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -20,6 +22,12 @@ abstract class AppModule {
     abstract fun bindHeartRateRepository(
         heartRateRepositoryImpl: HeartRateRepositoryImpl
     ): HeartRateRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSkinTemperatureRepository(
+        skinTemperatureRepositoryImpl: SkinTemperatureRepositoryImpl
+    ): SkinTemperatureRepository
 
     // Communication
     @Binds

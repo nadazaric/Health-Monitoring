@@ -13,38 +13,51 @@ import com.healthmonitoring.wear.consts.Permissions
 import com.healthmonitoring.wear.core.service.SensorTrackingService
 
 @Composable
-fun MonitoringHost(content: @Composable () -> Unit) {
+fun MonitoringHost(
+    content: @Composable () -> Unit
+) {
     val context = LocalContext.current
-    val permission = getHeartRatePermission()
+    val requiredPermissions = getRequiredSensorPermissions()
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissionResults ->
+        val areAllPermissionsGranted = requiredPermissions.all { permission ->
+            permissionResults[permission] == true
+        }
+
+        if (areAllPermissionsGranted) {
             SensorTrackingService.start(context.applicationContext)
         }
     }
 
     LaunchedEffect(Unit) {
-        val isGranted = ContextCompat.checkSelfPermission(
-            context,
-            permission
-        ) == PackageManager.PERMISSION_GRANTED
+        val areAllPermissionsGranted = requiredPermissions.all { permission ->
+            ContextCompat.checkSelfPermission(
+                context,
+                permission
+            ) == PackageManager.PERMISSION_GRANTED
+        }
 
-        if (isGranted) {
+        if (areAllPermissionsGranted) {
             SensorTrackingService.start(context.applicationContext)
         } else {
-            permissionLauncher.launch(permission)
+            permissionLauncher.launch(requiredPermissions)
         }
     }
 
     content()
 }
 
-private fun getHeartRatePermission(): String {
+private fun getRequiredSensorPermissions(): Array<String> {
     return if (Build.VERSION.SDK_INT >= 36) {
-        Permissions.READ_HEART_RATE_PERMISSION
+        arrayOf(
+            Permissions.READ_HEART_RATE_PERMISSION,
+            Permissions.READ_SKIN_TEMPERATURE_PERMISSION
+        )
     } else {
-        Manifest.permission.BODY_SENSORS
+        arrayOf(
+            Manifest.permission.BODY_SENSORS
+        )
     }
 }

@@ -10,6 +10,7 @@ import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import com.healthmonitoring.mobile.consts.Tags
 import com.healthmonitoring.mobile.feature.heartrate.domain.model.HeartRateMeasurement
+import com.healthmonitoring.mobile.feature.skin_temperature.domain.model.SkinTemperatureMeasurement
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,9 +25,11 @@ class HealthDataReceiverImpl @Inject constructor(
 
     private val applicationContext = context.applicationContext
 
-    private val heartRateMeasurements = MutableSharedFlow<HeartRateMeasurement>(
-        replay = 1
-    )
+    private val heartRateMeasurements =
+        MutableSharedFlow<HeartRateMeasurement>(replay = 1)
+
+    private val skinTemperatureMeasurements =
+        MutableSharedFlow<SkinTemperatureMeasurement>(replay = 1)
 
     private var isListening = false
 
@@ -34,9 +37,12 @@ class HealthDataReceiverImpl @Inject constructor(
         return heartRateMeasurements.asSharedFlow()
     }
 
+    override fun observeSkinTemperature(): Flow<SkinTemperatureMeasurement> {
+        return skinTemperatureMeasurements.asSharedFlow()
+    }
+
     override fun startListening() {
         if (isListening) {
-            Log.d(Tags.DATA_LAYER, "Health data receiver is already listening.")
             return
         }
 
@@ -44,9 +50,12 @@ class HealthDataReceiverImpl @Inject constructor(
 
         Wearable.getDataClient(applicationContext).addListener(this)
 
-        Log.d(Tags.DATA_LAYER, "Health data receiver listener registered.")
+        Log.d(
+            Tags.DATA_LAYER,
+            "Health data receiver listener registered."
+        )
 
-        readLatestHeartRate()
+        readLatestHealthData()
     }
 
     override fun stopListening() {
@@ -58,14 +67,17 @@ class HealthDataReceiverImpl @Inject constructor(
 
         isListening = false
 
-        Log.d(Tags.DATA_LAYER, "Health data receiver listener removed.")
+        Log.d(
+            Tags.DATA_LAYER,
+            "Health data receiver listener removed."
+        )
     }
 
     override fun onDataChanged(dataEvents: DataEventBuffer) {
         try {
             dataEvents.forEach { dataEvent ->
                 if (dataEvent.type == DataEvent.TYPE_CHANGED) {
-                    handleHeartRateDataItem(dataEvent.dataItem)
+                    handleHealthDataItem(dataEvent.dataItem)
                 }
             }
         } finally {
@@ -73,13 +85,13 @@ class HealthDataReceiverImpl @Inject constructor(
         }
     }
 
-    private fun readLatestHeartRate() {
+    private fun readLatestHealthData() {
         Wearable.getDataClient(applicationContext)
             .getDataItems()
             .addOnSuccessListener { dataItems ->
                 try {
                     dataItems.forEach { dataItem ->
-                        handleHeartRateDataItem(dataItem)
+                        handleHealthDataItem(dataItem)
                     }
                 } finally {
                     dataItems.release()
@@ -88,17 +100,25 @@ class HealthDataReceiverImpl @Inject constructor(
             .addOnFailureListener { exception ->
                 Log.e(
                     Tags.DATA_LAYER,
-                    "Failed to read latest heart rate data item.",
+                    "Failed to read latest health data items.",
                     exception
                 )
             }
     }
 
-    private fun handleHeartRateDataItem(dataItem: DataItem) {
-        if (dataItem.uri.path != DataLayerConstants.HEART_RATE_LATEST_PATH) {
-            return
-        }
+    private fun handleHealthDataItem(dataItem: DataItem) {
+        when (dataItem.uri.path) {
+            DataLayerConstants.HEART_RATE_LATEST_PATH -> {
+                handleHeartRateDataItem(dataItem)
+            }
 
+            DataLayerConstants.SKIN_TEMPERATURE_LATEST_PATH -> {
+                handleSkinTemperatureDataItem(dataItem)
+            }
+        }
+    }
+
+    private fun handleHeartRateDataItem(dataItem: DataItem) {
         val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
 
         val measurement = HeartRateMeasurement(
@@ -110,8 +130,30 @@ class HealthDataReceiverImpl @Inject constructor(
         val emitted = heartRateMeasurements.tryEmit(measurement)
 
         Log.d(
-            Tags.DATA_LAYER,
+            Tags.DATA_LAYER_HEART_RATE,
             "BPM: ${measurement.bpm}, emitted: $emitted"
+        )
+    }
+
+    private fun handleSkinTemperatureDataItem(dataItem: DataItem) {
+        val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
+
+        val measurement = SkinTemperatureMeasurement(
+            objectTemperature = dataMap.getFloat(
+                DataLayerConstants.OBJECT_TEMPERATURE_KEY
+            ),
+            ambientTemperature = dataMap.getFloat(
+                DataLayerConstants.AMBIENT_TEMPERATURE_KEY
+            ),
+            status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
+            timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
+        )
+
+        val emitted = skinTemperatureMeasurements.tryEmit(measurement)
+
+        Log.d(
+            Tags.DATA_LAYER_SKIN_TEMPERATURE,
+            "Object: ${measurement.objectTemperature} °C, ambient: ${measurement.ambientTemperature} °C, emitted: $emitted"
         )
     }
 }

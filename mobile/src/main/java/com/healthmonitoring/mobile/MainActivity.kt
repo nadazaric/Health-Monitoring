@@ -4,23 +4,20 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.healthmonitoring.mobile.core.datalayer.HealthDataReceiver
 import com.healthmonitoring.mobile.feature.heartrate.presentation.component.HeartRateCard
+import com.healthmonitoring.mobile.feature.skin_temperature.presentation.component.SkinTemperatureCard
 import com.healthmonitoring.mobile.ui.theme.Dimens
 import com.healthmonitoring.mobile.ui.theme.HealthMonitoringTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -72,7 +69,7 @@ fun MobileApp() {
             }
         ) {
             Text(
-                text = "Health Monitoring",
+                text = stringResource(R.string.app_name),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -81,6 +78,12 @@ fun MobileApp() {
 
         item {
             HeartRateCard(
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        item {
+            SkinTemperatureCard(
                 modifier = Modifier.fillMaxWidth()
             )
         }
