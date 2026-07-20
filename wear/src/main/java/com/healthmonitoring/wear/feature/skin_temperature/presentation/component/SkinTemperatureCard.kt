@@ -1,68 +1,28 @@
 package com.healthmonitoring.wear.feature.skin_temperature.presentation.component
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.wear.compose.material3.Icon
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import com.healthmonitoring.wear.R
+import com.healthmonitoring.wear.core.presentation.component.HealthMetricCard
 import com.healthmonitoring.wear.feature.skin_temperature.presentation.SkinTemperatureState
 import com.healthmonitoring.wear.feature.skin_temperature.presentation.SkinTemperatureViewModel
-import com.healthmonitoring.wear.ui.theme.Dimens
 
 @Composable
 fun SkinTemperatureCard(
     modifier: Modifier = Modifier,
     viewModel: SkinTemperatureViewModel = hiltViewModel()
 ) {
-    SkinTemperatureCardContent(
-        state = viewModel.state.value,
-        modifier = modifier
-    )
-}
+    val state = viewModel.state.value
 
-@Composable
-private fun SkinTemperatureCardContent(
-    state: SkinTemperatureState,
-    modifier: Modifier = Modifier
-) {
-    Row(
+    HealthMetricCard(
+        iconId = R.drawable.ic_temperature,
+        iconDescriptionId = R.string.skin_temperature_description,
         modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                shape = RoundedCornerShape(
-                    Dimens.CardCornerRadius
-                )
-            )
-            .padding(
-                horizontal = Dimens.CardHorizontalContentPadding,
-                vertical = Dimens.CardVerticalContentPadding
-            ),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(
-            Dimens.CardContentSpacing
-        )
     ) {
-        Icon(
-            modifier = Modifier.size(Dimens.CardIconSize),
-            painter = painterResource(id = R.drawable.ic_temperature),
-            contentDescription = stringResource(R.string.skin_temperature_description),
-            tint = Color.White
-        )
-
         Text(
             text = getSkinTemperatureText(state),
             style = MaterialTheme.typography.titleLarge
