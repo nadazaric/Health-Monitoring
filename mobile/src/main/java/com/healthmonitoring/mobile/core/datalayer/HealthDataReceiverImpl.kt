@@ -6,6 +6,7 @@ import com.google.android.gms.wearable.DataClient
 import com.google.android.gms.wearable.DataEvent
 import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataItem
+import com.google.android.gms.wearable.DataMap
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import com.healthmonitoring.mobile.consts.Tags
@@ -51,11 +52,6 @@ class HealthDataReceiverImpl @Inject constructor(
 
     override fun startListening() {
         if (isListening) {
-            Log.d(
-                Tags.DATA_LAYER,
-                "Health data receiver is already listening."
-            )
-
             return
         }
 
@@ -136,59 +132,86 @@ class HealthDataReceiverImpl @Inject constructor(
     }
 
     private fun handleHeartRateDataItem(dataItem: DataItem) {
-        val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
-
-        val measurement = HeartRateMeasurement(
-            bpm = dataMap.getInt(DataLayerConstants.BPM_KEY),
-            status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
-            timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
-        )
-
-        val emitted = heartRateMeasurements.tryEmit(measurement)
-
-        Log.d(
-            Tags.DATA_LAYER_HEART_RATE,
-            "BPM: ${measurement.bpm}, emitted: $emitted"
+        handleMeasurementDataItem(
+            dataItem = dataItem,
+            createMeasurement = { dataMap ->
+                HeartRateMeasurement(
+                    bpm = dataMap.getInt(DataLayerConstants.BPM_KEY),
+                    status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
+                    timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
+                )
+            },
+            emitMeasurement = heartRateMeasurements::tryEmit,
+            logTag = Tags.DATA_LAYER_HEART_RATE,
+            createLogMessage = { measurement, emitted ->
+                "BPM: ${measurement.bpm}, emitted: $emitted"
+            }
         )
     }
 
     private fun handleSkinTemperatureDataItem(dataItem: DataItem) {
-        val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
-
-        val measurement = SkinTemperatureMeasurement(
-            objectTemperature = dataMap.getFloat(
-                DataLayerConstants.OBJECT_TEMPERATURE_KEY
-            ),
-            ambientTemperature = dataMap.getFloat(
-                DataLayerConstants.AMBIENT_TEMPERATURE_KEY
-            ),
-            status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
-            timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
-        )
-
-        val emitted = skinTemperatureMeasurements.tryEmit(measurement)
-
-        Log.d(
-            Tags.DATA_LAYER_SKIN_TEMPERATURE,
-            "Object: ${measurement.objectTemperature} °C, ambient: ${measurement.ambientTemperature} °C, emitted: $emitted"
+        handleMeasurementDataItem(
+            dataItem = dataItem,
+            createMeasurement = { dataMap ->
+                SkinTemperatureMeasurement(
+                    objectTemperature = dataMap.getFloat(
+                        DataLayerConstants.OBJECT_TEMPERATURE_KEY
+                    ),
+                    ambientTemperature = dataMap.getFloat(
+                        DataLayerConstants.AMBIENT_TEMPERATURE_KEY
+                    ),
+                    status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
+                    timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
+                )
+            },
+            emitMeasurement = skinTemperatureMeasurements::tryEmit,
+            logTag = Tags.DATA_LAYER_SKIN_TEMPERATURE,
+            createLogMessage = { measurement, emitted ->
+                "Object: ${measurement.objectTemperature} °C, ambient: ${measurement.ambientTemperature} °C, emitted: $emitted"
+            }
         )
     }
 
     private fun handleSpO2DataItem(dataItem: DataItem) {
+        handleMeasurementDataItem(
+            dataItem = dataItem,
+            createMeasurement = { dataMap ->
+                SpO2Measurement(
+                    spo2 = dataMap.getInt(DataLayerConstants.SPO2_KEY),
+                    heartRate = dataMap.getInt(
+                        DataLayerConstants.SPO2_HEART_RATE_KEY
+                    ),
+                    status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
+                    timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
+                )
+            },
+            emitMeasurement = spO2Measurements::tryEmit,
+            logTag = Tags.DATA_LAYER_SPO2,
+            createLogMessage = { measurement, emitted ->
+                "SpO2: ${measurement.spo2}%, heart rate: ${measurement.heartRate} BPM, emitted: $emitted"
+            }
+        )
+    }
+
+    private fun <T> handleMeasurementDataItem(
+        dataItem: DataItem,
+        createMeasurement: (DataMap) -> T,
+        emitMeasurement: (T) -> Boolean,
+        logTag: String,
+        createLogMessage: (T, Boolean) -> String
+    ) {
         val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
 
-        val measurement = SpO2Measurement(
-            spo2 = dataMap.getInt(DataLayerConstants.SPO2_KEY),
-            heartRate = dataMap.getInt(DataLayerConstants.SPO2_HEART_RATE_KEY),
-            status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
-            timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
-        )
+        val measurement = createMeasurement(dataMap)
 
-        val emitted = spO2Measurements.tryEmit(measurement)
+        val emitted = emitMeasurement(measurement)
 
         Log.d(
-            Tags.DATA_LAYER_SPO2,
-            "SpO2: ${measurement.spo2}%, heart rate: ${measurement.heartRate} BPM, emitted: $emitted"
+            logTag,
+            createLogMessage(
+                measurement,
+                emitted
+            )
         )
     }
 }
