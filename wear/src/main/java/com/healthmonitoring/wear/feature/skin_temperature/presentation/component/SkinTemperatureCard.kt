@@ -79,5 +79,5 @@ private fun getSkinTemperatureText(
             R.string.skin_temperature_value,
             temperature
         )
-    } ?: stringResource(R.string.skin_temperature_unavailable)
+    } ?: stringResource(R.string.no_data)
 }

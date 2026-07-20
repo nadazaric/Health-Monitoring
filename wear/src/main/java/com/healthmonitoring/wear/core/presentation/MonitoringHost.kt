@@ -53,7 +53,8 @@ private fun getRequiredSensorPermissions(): Array<String> {
     return if (Build.VERSION.SDK_INT >= 36) {
         arrayOf(
             Permissions.READ_HEART_RATE_PERMISSION,
-            Permissions.READ_SKIN_TEMPERATURE_PERMISSION
+            Permissions.READ_SKIN_TEMPERATURE_PERMISSION,
+            Permissions.READ_OXYGEN_SATURATION_PERMISSION
         )
     } else {
         arrayOf(

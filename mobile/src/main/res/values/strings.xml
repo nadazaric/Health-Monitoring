@@ -1,14 +1,17 @@
 <resources>
     <string name="app_name">Health Monitoring</string>
+    <string name="no_data">No data</string>
 
     <!--  heart rate  -->
     <string name="heart_rate_description">Heart rate</string>
     <string name="heart_rate_value">%1$d BPM</string>
-    <string name="heart_rate_unavailable">--- BPM</string>
 
     <!-- skin temperature -->
     <string name="skin_temperature_description">Skin Temperature</string>
     <string name="skin_temperature_value">%1$.1f °C</string>
-    <string name="skin_temperature_unavailable">-- °C</string>
+
+    <!-- SpO2 -->
+    <string name="spo2_description">SpO2</string>
+    <string name="spo2_value">%1$d %%</string>
 
 </resources>

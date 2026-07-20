@@ -16,8 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.healthmonitoring.mobile.core.datalayer.HealthDataReceiver
-import com.healthmonitoring.mobile.feature.heartrate.presentation.component.HeartRateCard
+import com.healthmonitoring.mobile.feature.heart_rate.presentation.component.HeartRateCard
 import com.healthmonitoring.mobile.feature.skin_temperature.presentation.component.SkinTemperatureCard
+import com.healthmonitoring.mobile.feature.spo2.presentation.component.SpO2Card
 import com.healthmonitoring.mobile.ui.theme.Dimens
 import com.healthmonitoring.mobile.ui.theme.HealthMonitoringTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -84,6 +85,12 @@ fun MobileApp() {
 
         item {
             SkinTemperatureCard(
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        item {
+            SpO2Card(
                 modifier = Modifier.fillMaxWidth()
             )
         }

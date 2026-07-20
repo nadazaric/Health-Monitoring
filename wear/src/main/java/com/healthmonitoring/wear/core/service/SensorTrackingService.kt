@@ -17,7 +17,7 @@ import androidx.core.content.ContextCompat
 import com.healthmonitoring.wear.R
 import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.core.HealthTrackerProvider
-import com.healthmonitoring.wear.feature.heartrate.domain.use_case.HeartRateUseCases
+import com.healthmonitoring.wear.feature.heart_rate.domain.use_case.HeartRateUseCases
 import com.healthmonitoring.wear.feature.skin_temperature.domain.use_case.SkinTemperatureUseCases
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject

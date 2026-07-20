@@ -16,6 +16,9 @@
         android:name="android.permission.health.READ_SKIN_TEMPERATURE"
         tools:ignore="HealthConnectPolicy" />
     <uses-permission
+        android:name="android.permission.health.READ_OXYGEN_SATURATION"
+        tools:ignore="HealthConnectPolicy" />
+    <uses-permission
         android:name="android.permission.FOREGROUND_SERVICE"
         tools:ignore="ForegroundServicesPolicy" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />

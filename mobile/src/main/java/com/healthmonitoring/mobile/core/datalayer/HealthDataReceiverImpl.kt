@@ -9,8 +9,9 @@ import com.google.android.gms.wearable.DataItem
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.Wearable
 import com.healthmonitoring.mobile.consts.Tags
-import com.healthmonitoring.mobile.feature.heartrate.domain.model.HeartRateMeasurement
+import com.healthmonitoring.mobile.feature.heart_rate.domain.model.HeartRateMeasurement
 import com.healthmonitoring.mobile.feature.skin_temperature.domain.model.SkinTemperatureMeasurement
+import com.healthmonitoring.mobile.feature.spo2.domain.model.SpO2Measurement
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,6 +32,9 @@ class HealthDataReceiverImpl @Inject constructor(
     private val skinTemperatureMeasurements =
         MutableSharedFlow<SkinTemperatureMeasurement>(replay = 1)
 
+    private val spO2Measurements =
+        MutableSharedFlow<SpO2Measurement>(replay = 1)
+
     private var isListening = false
 
     override fun observeHeartRate(): Flow<HeartRateMeasurement> {
@@ -41,8 +45,17 @@ class HealthDataReceiverImpl @Inject constructor(
         return skinTemperatureMeasurements.asSharedFlow()
     }
 
+    override fun observeSpO2(): Flow<SpO2Measurement> {
+        return spO2Measurements.asSharedFlow()
+    }
+
     override fun startListening() {
         if (isListening) {
+            Log.d(
+                Tags.DATA_LAYER,
+                "Health data receiver is already listening."
+            )
+
             return
         }
 
@@ -115,6 +128,10 @@ class HealthDataReceiverImpl @Inject constructor(
             DataLayerConstants.SKIN_TEMPERATURE_LATEST_PATH -> {
                 handleSkinTemperatureDataItem(dataItem)
             }
+
+            DataLayerConstants.SPO2_LATEST_PATH -> {
+                handleSpO2DataItem(dataItem)
+            }
         }
     }
 
@@ -154,6 +171,24 @@ class HealthDataReceiverImpl @Inject constructor(
         Log.d(
             Tags.DATA_LAYER_SKIN_TEMPERATURE,
             "Object: ${measurement.objectTemperature} °C, ambient: ${measurement.ambientTemperature} °C, emitted: $emitted"
+        )
+    }
+
+    private fun handleSpO2DataItem(dataItem: DataItem) {
+        val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
+
+        val measurement = SpO2Measurement(
+            spo2 = dataMap.getInt(DataLayerConstants.SPO2_KEY),
+            heartRate = dataMap.getInt(DataLayerConstants.SPO2_HEART_RATE_KEY),
+            status = dataMap.getInt(DataLayerConstants.STATUS_KEY),
+            timestamp = dataMap.getLong(DataLayerConstants.TIMESTAMP_KEY)
+        )
+
+        val emitted = spO2Measurements.tryEmit(measurement)
+
+        Log.d(
+            Tags.DATA_LAYER_SPO2,
+            "SpO2: ${measurement.spo2}%, heart rate: ${measurement.heartRate} BPM, emitted: $emitted"
         )
     }
 }

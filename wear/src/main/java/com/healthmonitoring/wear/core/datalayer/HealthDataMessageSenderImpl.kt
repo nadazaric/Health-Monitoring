@@ -5,8 +5,9 @@ import android.util.Log
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.healthmonitoring.wear.consts.Tags
-import com.healthmonitoring.wear.feature.heartrate.domain.model.HeartRateMeasurement
+import com.healthmonitoring.wear.feature.heart_rate.domain.model.HeartRateMeasurement
 import com.healthmonitoring.wear.feature.skin_temperature.domain.model.SkinTemperatureMeasurement
+import com.healthmonitoring.wear.feature.spo2.domain.model.SpO2Measurement
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -64,6 +65,34 @@ class HealthDataMessageSenderImpl @Inject constructor(
                 Log.e(
                     Tags.DATA_LAYER,
                     "Failed to update latest skin temperature data item.",
+                    exception
+                )
+            }
+    }
+
+    override fun sendSpO2Measurement(
+        measurement: SpO2Measurement
+    ) {
+        val putDataMapRequest = PutDataMapRequest.create(
+            DataLayerConstants.SPO2_LATEST_PATH
+        ).apply {
+            dataMap.putInt(DataLayerConstants.SPO2_KEY, measurement.spo2)
+            dataMap.putInt(DataLayerConstants.SPO2_HEART_RATE_KEY, measurement.heartRate)
+            dataMap.putInt(DataLayerConstants.STATUS_KEY, measurement.status)
+            dataMap.putLong(DataLayerConstants.TIMESTAMP_KEY, measurement.timestamp)
+            dataMap.putLong(DataLayerConstants.UPDATED_AT_KEY, System.currentTimeMillis())
+        }
+
+        val putDataRequest = putDataMapRequest
+            .asPutDataRequest()
+            .setUrgent()
+
+        Wearable.getDataClient(context)
+            .putDataItem(putDataRequest)
+            .addOnFailureListener { exception ->
+                Log.e(
+                    Tags.DATA_LAYER,
+                    "Failed to update latest SpO2 data item.",
                     exception
                 )
             }

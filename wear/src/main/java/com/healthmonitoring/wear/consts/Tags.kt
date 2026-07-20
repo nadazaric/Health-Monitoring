@@ -15,6 +15,10 @@ object Tags {
     const val SKIN_TEMPERATURE_LISTENER = "SkinTemperatureListener"
     const val SKIN_TEMPERATURE_REPOSITORY = "SkinTemperatureRepository"
 
+    // SpO2
+    const val SPO2_LISTENER = "SpO2Listener"
+    const val SPO2_REPOSITORY = "SpO2Repository"
+
     // DataLayer
     const val DATA_LAYER = "DataLayer"
 
