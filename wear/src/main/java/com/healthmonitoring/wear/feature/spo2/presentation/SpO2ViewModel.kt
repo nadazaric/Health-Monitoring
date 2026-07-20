@@ -4,6 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.healthmonitoring.wear.feature.spo2.domain.model.SpO2MeasurementState
 import com.healthmonitoring.wear.feature.spo2.domain.use_case.SpO2UseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ class SpO2ViewModel @Inject constructor(
 
     fun startMeasurement() {
         _state.value = _state.value.copy(
-            isMeasuring = true,
+            measurementState = SpO2MeasurementState.MEASURING,
             errorMessage = null
         )
 
@@ -39,7 +40,7 @@ class SpO2ViewModel @Inject constructor(
                     heartRate = measurement.heartRate,
                     status = measurement.status,
                     timestamp = measurement.timestamp,
-                    isMeasuring = false,
+                    measurementState = SpO2MeasurementState.COMPLETED,
                     errorMessage = null
                 )
             }
@@ -50,7 +51,7 @@ class SpO2ViewModel @Inject constructor(
         viewModelScope.launch {
             spO2UseCases.observeMeasurementErrors().collect { message ->
                 _state.value = _state.value.copy(
-                    isMeasuring = false,
+                    measurementState = SpO2MeasurementState.FAILED,
                     errorMessage = message
                 )
             }

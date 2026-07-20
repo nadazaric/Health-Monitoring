@@ -5,6 +5,7 @@ import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSender
 import com.healthmonitoring.wear.feature.spo2.data.listener.SpO2Listener
 import com.healthmonitoring.wear.feature.spo2.domain.model.SpO2Measurement
+import com.healthmonitoring.wear.feature.spo2.domain.model.SpO2MeasurementState
 import com.healthmonitoring.wear.feature.spo2.domain.repository.SpO2Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,10 +32,23 @@ class SpO2RepositoryImpl @Inject constructor(
         spO2Listener.setOnSpO2MeasuredCallback { measurement ->
             spO2Measurements.tryEmit(measurement)
             healthDataMessageSender.sendSpO2Measurement(measurement)
+            healthDataMessageSender.sendSpO2MeasurementState(
+                measurementState = SpO2MeasurementState.COMPLETED
+            )
         }
 
         spO2Listener.setOnMeasurementFailedCallback { message ->
-            measurementErrors.tryEmit(message)
+            val emitted = measurementErrors.tryEmit(message)
+
+            Log.d(
+                Tags.SPO2_REPOSITORY,
+                "SpO2 measurement error emitted: $message, emitted: $emitted"
+            )
+
+            healthDataMessageSender.sendSpO2MeasurementState(
+                measurementState = SpO2MeasurementState.FAILED,
+                errorMessage = message
+            )
         }
     }
 
@@ -50,6 +64,10 @@ class SpO2RepositoryImpl @Inject constructor(
         Log.d(
             Tags.SPO2_REPOSITORY,
             "Starting SpO2 measurement."
+        )
+
+        healthDataMessageSender.sendSpO2MeasurementState(
+            measurementState = SpO2MeasurementState.MEASURING
         )
 
         spO2Listener.startMeasurement()

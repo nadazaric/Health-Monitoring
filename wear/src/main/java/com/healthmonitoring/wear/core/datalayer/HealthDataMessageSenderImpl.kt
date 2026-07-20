@@ -8,6 +8,7 @@ import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.feature.heart_rate.domain.model.HeartRateMeasurement
 import com.healthmonitoring.wear.feature.skin_temperature.domain.model.SkinTemperatureMeasurement
 import com.healthmonitoring.wear.feature.spo2.domain.model.SpO2Measurement
+import com.healthmonitoring.wear.feature.spo2.domain.model.SpO2MeasurementState
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -93,6 +94,33 @@ class HealthDataMessageSenderImpl @Inject constructor(
                 Log.e(
                     Tags.DATA_LAYER,
                     "Failed to update latest SpO2 data item.",
+                    exception
+                )
+            }
+    }
+
+    override fun sendSpO2MeasurementState(
+        measurementState: SpO2MeasurementState,
+        errorMessage: String?
+    ) {
+        val putDataMapRequest = PutDataMapRequest.create(
+            DataLayerConstants.SPO2_STATE_PATH
+        ).apply {
+            dataMap.putString(DataLayerConstants.MEASUREMENT_STATE_KEY, measurementState.dataLayerValue)
+            dataMap.putString(DataLayerConstants.ERROR_MESSAGE_KEY, errorMessage.orEmpty())
+            dataMap.putLong(DataLayerConstants.UPDATED_AT_KEY, System.currentTimeMillis())
+        }
+
+        val putDataRequest = putDataMapRequest
+            .asPutDataRequest()
+            .setUrgent()
+
+        Wearable.getDataClient(context)
+            .putDataItem(putDataRequest)
+            .addOnFailureListener { exception ->
+                Log.e(
+                    Tags.DATA_LAYER,
+                    "Failed to update latest SpO2 measurement state.",
                     exception
                 )
             }
