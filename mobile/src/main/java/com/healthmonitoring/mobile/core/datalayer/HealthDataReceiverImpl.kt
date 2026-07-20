@@ -12,8 +12,6 @@ import com.healthmonitoring.mobile.consts.Tags
 import com.healthmonitoring.mobile.feature.heart_rate.domain.model.HeartRateMeasurement
 import com.healthmonitoring.mobile.feature.skin_temperature.domain.model.SkinTemperatureMeasurement
 import com.healthmonitoring.mobile.feature.spo2.domain.model.SpO2Measurement
-import com.healthmonitoring.mobile.feature.spo2.domain.model.SpO2MeasurementState
-import com.healthmonitoring.mobile.feature.spo2.domain.model.SpO2MeasurementStateUpdate
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -37,9 +35,6 @@ class HealthDataReceiverImpl @Inject constructor(
     private val spO2Measurements =
         MutableSharedFlow<SpO2Measurement>(replay = 1)
 
-    private val spO2MeasurementStateUpdates =
-        MutableSharedFlow<SpO2MeasurementStateUpdate>(replay = 1)
-
     private var isListening = false
 
     override fun observeHeartRate(): Flow<HeartRateMeasurement> {
@@ -52,10 +47,6 @@ class HealthDataReceiverImpl @Inject constructor(
 
     override fun observeSpO2(): Flow<SpO2Measurement> {
         return spO2Measurements.asSharedFlow()
-    }
-
-    override fun observeSpO2MeasurementState(): Flow<SpO2MeasurementStateUpdate> {
-        return spO2MeasurementStateUpdates.asSharedFlow()
     }
 
     override fun startListening() {
@@ -141,10 +132,6 @@ class HealthDataReceiverImpl @Inject constructor(
             DataLayerConstants.SPO2_LATEST_PATH -> {
                 handleSpO2DataItem(dataItem)
             }
-
-            DataLayerConstants.SPO2_STATE_PATH -> {
-                handleSpO2MeasurementStateDataItem(dataItem)
-            }
         }
     }
 
@@ -202,31 +189,6 @@ class HealthDataReceiverImpl @Inject constructor(
         Log.d(
             Tags.DATA_LAYER_SPO2,
             "SpO2: ${measurement.spo2}%, heart rate: ${measurement.heartRate} BPM, emitted: $emitted"
-        )
-    }
-
-    private fun handleSpO2MeasurementStateDataItem(dataItem: DataItem) {
-        val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
-
-        val errorMessage = dataMap.getString(
-            DataLayerConstants.ERROR_MESSAGE_KEY
-        ).orEmpty().takeIf { message ->
-            message.isNotBlank()
-        }
-
-        val stateUpdate = SpO2MeasurementStateUpdate(
-            measurementState = SpO2MeasurementState.fromDataLayerValue(
-                dataMap.getString(DataLayerConstants.MEASUREMENT_STATE_KEY)
-            ),
-            errorMessage = errorMessage,
-            updatedAt = dataMap.getLong(DataLayerConstants.UPDATED_AT_KEY)
-        )
-
-        val emitted = spO2MeasurementStateUpdates.tryEmit(stateUpdate)
-
-        Log.d(
-            Tags.DATA_LAYER,
-            "State: ${stateUpdate.measurementState}, emitted: $emitted"
         )
     }
 }

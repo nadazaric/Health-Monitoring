@@ -30,7 +30,6 @@ import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import com.healthmonitoring.wear.R
-import com.healthmonitoring.wear.feature.spo2.domain.model.SpO2MeasurementState
 import com.healthmonitoring.wear.feature.spo2.presentation.SpO2State
 import com.healthmonitoring.wear.feature.spo2.presentation.SpO2ViewModel
 import com.healthmonitoring.wear.ui.theme.Dimens
@@ -42,25 +41,7 @@ fun SpO2Card(
 ) {
     val state = viewModel.state.value
 
-    val measuringTransition = rememberInfiniteTransition(
-        label = "SpO2 measuring fade"
-    )
-
-    val measuringAlpha by measuringTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 800),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "SpO2 measuring alpha"
-    )
-
-    val textAlpha = if (state.isMeasuring) {
-        measuringAlpha
-    } else {
-        1f
-    }
+    val textAlpha = getTextAlpha(state)
 
     Column(
         modifier = modifier
@@ -120,6 +101,31 @@ fun SpO2Card(
 }
 
 @Composable
+private fun getTextAlpha(
+    state: SpO2State
+): Float {
+    if (!state.isMeasuring) {
+        return 1f
+    }
+
+    val measuringTransition = rememberInfiniteTransition(
+        label = "SpO2 measuring fade"
+    )
+
+    val measuringAlpha by measuringTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 800),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "SpO2 measuring alpha"
+    )
+
+    return measuringAlpha
+}
+
+@Composable
 private fun getSpO2Text(
     state: SpO2State
 ): String {
@@ -140,7 +146,7 @@ private fun getSpO2SubtitleText(
     state: SpO2State
 ): String {
     return when {
-        state.measurementState == SpO2MeasurementState.FAILED -> {
+        state.errorMessage != null -> {
             stringResource(R.string.spo2_measurement_failed)
         }
 

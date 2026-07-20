@@ -1,12 +1,8 @@
 package com.healthmonitoring.mobile.feature.spo2.presentation.component
 
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,17 +13,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.healthmonitoring.mobile.R
-import com.healthmonitoring.mobile.feature.spo2.domain.model.SpO2MeasurementState
 import com.healthmonitoring.mobile.feature.spo2.presentation.SpO2State
 import com.healthmonitoring.mobile.feature.spo2.presentation.SpO2ViewModel
 import com.healthmonitoring.mobile.ui.theme.Dimens
@@ -38,26 +31,6 @@ fun SpO2Card(
     viewModel: SpO2ViewModel = hiltViewModel()
 ) {
     val state = viewModel.state.value
-
-    val measuringTransition = rememberInfiniteTransition(
-        label = "SpO2 measuring fade"
-    )
-
-    val measuringAlpha by measuringTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 800),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "SpO2 measuring alpha"
-    )
-
-    val textAlpha = if (state.isMeasuring) {
-        measuringAlpha
-    } else {
-        1f
-    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -71,16 +44,14 @@ fun SpO2Card(
             defaultElevation = Dimens.CardElevation
         )
     ) {
-        Column(
+        Column (
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
                     horizontal = Dimens.CardHorizontalContentPadding,
                     vertical = Dimens.CardVerticalContentPadding
                 ),
-            verticalArrangement = Arrangement.spacedBy(
-                Dimens.CardContentSpacing
-            ),
+            verticalArrangement = Arrangement.spacedBy(Dimens.CardContentSpacing),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
@@ -90,25 +61,10 @@ fun SpO2Card(
                 tint = Color.Black
             )
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    modifier = Modifier.alpha(textAlpha),
-                    text = getSpO2Text(state),
-                    style = MaterialTheme.typography.titleLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    modifier = Modifier.alpha(textAlpha),
-                    text = getSpO2SubtitleText(state),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = getSpO2Text(state),
+                style = MaterialTheme.typography.titleLarge
+            )
         }
     }
 }
@@ -117,43 +73,10 @@ fun SpO2Card(
 private fun getSpO2Text(
     state: SpO2State
 ): String {
-    return when {
-        state.isMeasuring -> {
-            stringResource(R.string.spo2_measuring)
-        }
-
-        state.spo2 != null -> {
-            stringResource(
-                R.string.spo2_value,
-                state.spo2
-            )
-        }
-
-        else -> {
-            stringResource(R.string.no_data)
-        }
-    }
-}
-
-@Composable
-private fun getSpO2SubtitleText(
-    state: SpO2State
-): String {
-    return when {
-        state.measurementState == SpO2MeasurementState.FAILED -> {
-            stringResource(R.string.spo2_measurement_failed)
-        }
-
-        state.isMeasuring -> {
-            stringResource(R.string.spo2_keep_still)
-        }
-
-        state.spo2 != null -> {
-            stringResource(R.string.spo2_last_measurement)
-        }
-
-        else -> {
-            stringResource(R.string.spo2_waiting_for_data)
-        }
-    }
+    return state.spo2?.let { spO2 ->
+        stringResource(
+            R.string.spo2_value,
+            spO2
+        )
+    } ?: stringResource(R.string.no_data)
 }

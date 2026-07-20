@@ -4,7 +4,6 @@ object DataLayerConstants {
     const val HEART_RATE_LATEST_PATH = "/heart-rate/latest"
     const val SKIN_TEMPERATURE_LATEST_PATH = "/skin-temperature/latest"
     const val SPO2_LATEST_PATH = "/spo2/latest"
-    const val SPO2_STATE_PATH = "/spo2/state"
 
     const val BPM_KEY = "bpm"
     const val OBJECT_TEMPERATURE_KEY = "objectTemperature"
@@ -15,6 +14,4 @@ object DataLayerConstants {
     const val STATUS_KEY = "status"
     const val TIMESTAMP_KEY = "timestamp"
     const val UPDATED_AT_KEY = "updatedAt"
-    const val MEASUREMENT_STATE_KEY = "measurementState"
-    const val ERROR_MESSAGE_KEY = "errorMessage"
 }
