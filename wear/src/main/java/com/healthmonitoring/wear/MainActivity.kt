@@ -13,6 +13,7 @@ import androidx.wear.compose.foundation.lazy.rememberTransformingLazyColumnState
 import androidx.wear.compose.material3.AppScaffold
 import com.healthmonitoring.wear.core.presentation.MonitoringHost
 import com.healthmonitoring.wear.feature.heart_rate.presentation.component.HeartRateCard
+import com.healthmonitoring.wear.feature.ppg.presentation.component.PpgCard
 import com.healthmonitoring.wear.feature.skin_temperature.presentation.component.SkinTemperatureCard
 import com.healthmonitoring.wear.feature.spo2.presentation.component.SpO2Card
 import com.healthmonitoring.wear.ui.theme.Dimens
@@ -63,6 +64,12 @@ fun WearApp() {
 
                     item {
                         SpO2Card(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    item {
+                        PpgCard(
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

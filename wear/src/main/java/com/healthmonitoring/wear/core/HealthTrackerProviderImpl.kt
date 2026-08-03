@@ -8,6 +8,7 @@ import com.samsung.android.service.health.tracking.HealthTracker
 import com.samsung.android.service.health.tracking.HealthTrackerException
 import com.samsung.android.service.health.tracking.HealthTrackingService
 import com.samsung.android.service.health.tracking.data.HealthTrackerType
+import com.samsung.android.service.health.tracking.data.PpgType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -132,6 +133,49 @@ class HealthTrackerProviderImpl @Inject constructor(
             Log.e(
                 Tags.HEALTH_TRACKING_MANAGER,
                 "Failed to create Health Tracker instance. Tracker: $healthTrackerType",
+                exception
+            )
+
+            null
+        }
+    }
+
+    override fun getPpgTracker(
+        healthTrackerType: HealthTrackerType,
+        ppgTypes: Set<PpgType>
+    ): HealthTracker? {
+        if (!connected) {
+            Log.w(
+                Tags.HEALTH_TRACKING_MANAGER,
+                "Cannot get PPG tracker because Health Tracking Service is not connected. Tracker: $healthTrackerType"
+            )
+
+            return null
+        }
+
+        if (!isTrackerAvailable(healthTrackerType)) {
+            Log.w(
+                Tags.HEALTH_TRACKING_MANAGER,
+                "Requested PPG tracker is not available on this device. Tracker: $healthTrackerType"
+            )
+
+            return null
+        }
+
+        return try {
+            Log.i(
+                Tags.HEALTH_TRACKING_MANAGER,
+                "Creating PPG Health Tracker instance. Tracker: $healthTrackerType, PPG types: $ppgTypes"
+            )
+
+            healthTrackingService?.getHealthTracker(
+                healthTrackerType,
+                ppgTypes
+            )
+        } catch (exception: Exception) {
+            Log.e(
+                Tags.HEALTH_TRACKING_MANAGER,
+                "Failed to create PPG Health Tracker instance. Tracker: $healthTrackerType",
                 exception
             )
 

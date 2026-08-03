@@ -19,6 +19,10 @@ object Tags {
     const val SPO2_LISTENER = "SpO2Listener"
     const val SPO2_REPOSITORY = "SpO2Repository"
 
+    // PPG
+    const val PPG_LISTENER = "PpgListener"
+    const val PPG_REPOSITORY = "PpgRepository"
+
     // DataLayer
     const val DATA_LAYER = "DataLayer"
 

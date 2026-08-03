@@ -54,7 +54,8 @@ private fun getRequiredSensorPermissions(): Array<String> {
         arrayOf(
             Permissions.READ_HEART_RATE_PERMISSION,
             Permissions.READ_SKIN_TEMPERATURE_PERMISSION,
-            Permissions.READ_OXYGEN_SATURATION_PERMISSION
+            Permissions.READ_OXYGEN_SATURATION_PERMISSION,
+            Permissions.READ_ADDITIONAL_HEALTH_DATA_PERMISSION
         )
     } else {
         arrayOf(

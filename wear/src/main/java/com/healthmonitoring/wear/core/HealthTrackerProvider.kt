@@ -2,6 +2,7 @@ package com.healthmonitoring.wear.core
 
 import com.samsung.android.service.health.tracking.HealthTracker
 import com.samsung.android.service.health.tracking.data.HealthTrackerType
+import com.samsung.android.service.health.tracking.data.PpgType
 
 interface HealthTrackerProvider {
 
@@ -15,6 +16,10 @@ interface HealthTrackerProvider {
 
     fun getTracker(healthTrackerType: HealthTrackerType): HealthTracker?
 
-    fun setOnConnectedCallback(callback: () -> Unit)
+    fun getPpgTracker(
+        healthTrackerType: HealthTrackerType,
+        ppgTypes: Set<PpgType>
+    ): HealthTracker?
 
+    fun setOnConnectedCallback(callback: () -> Unit)
 }

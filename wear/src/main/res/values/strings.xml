@@ -19,4 +19,13 @@
     <string name="spo2_keep_still">Keep still</string>
     <string name="spo2_measurement_failed">Try again</string>
 
+    <!-- PPG -->
+    <string name="ppg_description">PPG</string>
+    <string name="ppg_measuring">Measuring</string>
+    <string name="ppg_tap_to_measure">Tap to measure</string>
+    <string name="ppg_tap_to_stop">Tap to stop</string>
+    <string name="ppg_measurement_failed">Try again</string>
+    <string name="ppg_values">G: %1$d  R: %2$d  IR: %3$d</string>
+    <string name="ppg_statuses">Status: %1$d / %2$d / %3$d</string>
+
 </resources>
