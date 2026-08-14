@@ -15,6 +15,7 @@ import com.healthmonitoring.wear.feature.ppg.presentation.PpgViewModel
 
 @Composable
 fun PpgCard(
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: PpgViewModel = hiltViewModel()
 ) {
@@ -24,17 +25,11 @@ fun PpgCard(
         iconId = R.drawable.ic_heart,
         iconDescriptionId = R.string.ppg_description,
         modifier = modifier,
-        onClick = {
-            if (state.isMeasuring) {
-                viewModel.stopMeasurement()
-            } else {
-                viewModel.startMeasurement()
-            }
-        }
+        onClick = onClick
     ) {
         Column {
             Text(
-                text = getPpgText(state),
+                text = stringResource(R.string.ppg_description),
                 style = MaterialTheme.typography.titleMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -48,7 +43,7 @@ fun PpgCard(
             )
 
             Text(
-                text = getPpgActionText(state),
+                text = stringResource(R.string.ppg_open_measurement),
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -58,64 +53,24 @@ fun PpgCard(
 }
 
 @Composable
-private fun getPpgText(
+private fun getPpgStatusText(
     state: PpgState
 ): String {
-    val measurement = state.measurement
-
     return when {
-        measurement != null -> {
-            stringResource(
-                R.string.ppg_values,
-                measurement.green,
-                measurement.red,
-                measurement.infrared
-            )
+        state.errorMessage != null -> {
+            stringResource(R.string.ppg_measurement_failed)
         }
 
         state.isMeasuring -> {
             stringResource(R.string.ppg_measuring)
         }
 
-        else -> {
-            stringResource(R.string.no_data)
-        }
-    }
-}
-
-@Composable
-private fun getPpgStatusText(
-    state: PpgState
-): String {
-    val measurement = state.measurement
-
-    return when {
-        state.errorMessage != null -> {
-            stringResource(R.string.ppg_measurement_failed)
-        }
-
-        measurement != null -> {
-            stringResource(
-                R.string.ppg_statuses,
-                measurement.greenStatus,
-                measurement.redStatus,
-                measurement.infraredStatus
-            )
+        state.isMeasurementCompleted -> {
+            stringResource(R.string.ppg_measurement_completed)
         }
 
         else -> {
-            stringResource(R.string.ppg_tap_to_measure)
+            stringResource(R.string.ppg_ready_to_measure)
         }
-    }
-}
-
-@Composable
-private fun getPpgActionText(
-    state: PpgState
-): String {
-    return if (state.isMeasuring) {
-        stringResource(R.string.ppg_tap_to_stop)
-    } else {
-        stringResource(R.string.ppg_tap_to_measure)
     }
 }
