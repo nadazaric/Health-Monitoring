@@ -5,7 +5,7 @@ import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasuremen
 
 interface PpgSignalProcessor {
 
-    fun process(measurement: PpgMeasurement): PpgProcessedMeasurement
+    fun process(measurement: PpgMeasurement): List<PpgProcessedMeasurement>
 
     fun reset()
 }

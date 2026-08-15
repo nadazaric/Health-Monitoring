@@ -76,11 +76,13 @@ class PpgViewModel @Inject constructor(
                     }
 
                     PpgMeasurementPhase.MEASURING -> {
-                        val processedMeasurement = ppgSignalProcessor.process(
-                            measurement = measurement
-                        )
+                        val processedMeasurements = ppgSignalProcessor.process(measurement = measurement)
                         rawMeasurements.add(measurement)
-                        addChartMeasurement(measurement = processedMeasurement)
+                        processedMeasurements.forEach { processedMeasurement ->
+                            addChartMeasurement(
+                                measurement = processedMeasurement
+                            )
+                        }
                     }
 
                     PpgMeasurementPhase.IDLE, PpgMeasurementPhase.COMPLETED -> {
