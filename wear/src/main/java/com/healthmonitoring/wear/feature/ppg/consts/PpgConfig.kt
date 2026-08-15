@@ -2,11 +2,12 @@ package com.healthmonitoring.wear.feature.ppg.consts
 
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgChannelSubtraction
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgDcRemovalType
+import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgFilterType
 
 object PpgConfig {
 
     const val CHART_MIN_VALUE_RANGE = 1.0
-    const val CHART_WINDOW_MILLIS = 3_000L
+    const val CHART_WINDOW_MILLIS = 2_000L
     const val CSV_EXPORT_ENABLED = false
 
     const val STARTUP_TRIM_MILLIS = 600L
@@ -16,8 +17,15 @@ object PpgConfig {
 
     // Algorithm parameters
     const val INVERT_PROCESSED_SIGNAL = true
-    val CHANNEL_SUBTRACTION = PpgChannelSubtraction.RED_INFRARED_MEAN
+    val CHANNEL_SUBTRACTION = PpgChannelSubtraction.NONE
+
     val DC_REMOVAL_TYPE = PpgDcRemovalType.CENTERED
     const val DC_REMOVAL_WINDOW_MILLIS = 2_000L
+
+    val FILTER_TYPE = PpgFilterType.BAND_PASS
+    const val HIGH_PASS_CUTOFF_HZ = 0.7
+    const val HIGH_PASS_FILTER_PASSES = 1
+    const val LOW_PASS_CUTOFF_HZ = 5.0
+    const val LOW_PASS_FILTER_PASSES = 1
 
 }

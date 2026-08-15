@@ -7,17 +7,18 @@ import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
 import javax.inject.Inject
 
-class PpgSignalProcessorImpl @Inject constructor() :
-    PpgSignalProcessor {
+class PpgSignalProcessorImpl @Inject constructor(
+    private val ppgSignalFilter: PpgSignalFilter
+) : PpgSignalProcessor {
 
     private data class SignalSample(
         val value: Double,
         val timestamp: Long
     )
 
+    // DC Component removal
     private val causalWindow = ArrayDeque<SignalSample>()
     private var causalWindowSum = 0.0
-
     private val centeredSamples = mutableListOf<SignalSample>()
     private var centeredStartIndex = 0
     private var centeredEndIndex = 0
@@ -35,8 +36,13 @@ class PpgSignalProcessorImpl @Inject constructor() :
         )
 
         return dcRemovedSamples.map { sample ->
+            val filteredValue = ppgSignalFilter.apply(
+                value = sample.value,
+                timestamp = sample.timestamp
+            )
+
             PpgProcessedMeasurement(
-                value = invertSignal(sample.value),
+                value = invertSignal(filteredValue),
                 timestamp = sample.timestamp
             )
         }
@@ -45,6 +51,7 @@ class PpgSignalProcessorImpl @Inject constructor() :
     override fun reset() {
         resetCausalWindow()
         resetCenteredWindow()
+        ppgSignalFilter.reset()
     }
 
     private fun calculateChannelSubtraction(measurement: PpgMeasurement): Double {
