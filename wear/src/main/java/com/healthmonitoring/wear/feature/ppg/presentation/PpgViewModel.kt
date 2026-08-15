@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.data.export.PpgCsvExporter
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
 import com.healthmonitoring.wear.feature.ppg.domain.use_case.PpgUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,6 +32,7 @@ class PpgViewModel @Inject constructor(
 
     private val rawMeasurements = mutableListOf<PpgMeasurement>()
     private val chartMeasurements = ArrayDeque<PpgProcessedMeasurement>()
+    private val chartPeaks = ArrayDeque<PpgPeak>()
 
     private var measurementTimerJob: Job? = null
 
@@ -44,6 +46,7 @@ class PpgViewModel @Inject constructor(
 
         rawMeasurements.clear()
         chartMeasurements.clear()
+        chartPeaks.clear()
         ppgSignalProcessor.reset()
 
         _state.value = PpgState(
@@ -76,11 +79,14 @@ class PpgViewModel @Inject constructor(
                     }
 
                     PpgMeasurementPhase.MEASURING -> {
-                        val processedMeasurements = ppgSignalProcessor.process(measurement = measurement)
-                        rawMeasurements.add(measurement)
-                        processedMeasurements.forEach { processedMeasurement ->
+                        val processingResults = ppgSignalProcessor.process(measurement = measurement)
+                        processingResults.forEach { result ->
+                            result.peak?.let { peak ->
+                                addChartPeak(peak)
+                            }
+
                             addChartMeasurement(
-                                measurement = processedMeasurement
+                                measurement = result.measurement
                             )
                         }
                     }
@@ -215,17 +221,28 @@ class PpgViewModel @Inject constructor(
 
         val minimumTimestamp = measurement.timestamp - PpgConfig.CHART_WINDOW_MILLIS
 
-        while (
-            chartMeasurements.isNotEmpty() &&
-            chartMeasurements.first().timestamp <
-            minimumTimestamp
-        ) {
+        while (chartMeasurements.isNotEmpty() && chartMeasurements.first().timestamp < minimumTimestamp) {
             chartMeasurements.removeFirst()
+        }
+
+        while (chartPeaks.isNotEmpty() && chartPeaks.first().timestamp < minimumTimestamp) {
+            chartPeaks.removeFirst()
         }
 
         _state.value = _state.value.copy(
             chartMeasurements = chartMeasurements.toList(),
+            chartPeaks = chartPeaks.toList(),
             errorMessage = null
         )
+    }
+
+    private fun addChartPeak(peak: PpgPeak) {
+        val lastPeak = chartPeaks.lastOrNull()
+
+        if (lastPeak != null && peak.timestamp - lastPeak.timestamp < PpgConfig.PEAK_MIN_DISTANCE_MILLIS) {
+            chartPeaks.removeLast()
+        }
+
+        chartPeaks.addLast(peak)
     }
 }

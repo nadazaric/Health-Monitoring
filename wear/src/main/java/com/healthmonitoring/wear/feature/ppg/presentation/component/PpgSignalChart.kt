@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.wear.compose.material3.MaterialTheme
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
 import com.healthmonitoring.wear.ui.theme.Dimens
 import kotlin.math.max
@@ -16,9 +18,11 @@ import kotlin.math.max
 @Composable
 fun PpgSignalChart(
     measurements: List<PpgProcessedMeasurement>,
+    peaks: List<PpgPeak>,
     modifier: Modifier = Modifier
 ) {
     val lineColor = MaterialTheme.colorScheme.primary
+    val peakColor = MaterialTheme.colorScheme.secondary
 
     Canvas(
         modifier = modifier
@@ -66,5 +70,21 @@ fun PpgSignalChart(
             color = lineColor,
             style = Stroke(width = Dimens.ChartStrokeWidth.toPx())
         )
+
+        peaks.forEach { peak ->
+            if (peak.timestamp < firstTimestamp || peak.timestamp > lastTimestamp) {
+                return@forEach
+            }
+
+            val x = ((peak.timestamp - firstTimestamp).toFloat() / timeRange.toFloat()) * size.width
+            val normalizedValue = (peak.value - minimumValue) / valueRange
+            val y = size.height - normalizedValue.toFloat() * size.height
+
+            drawCircle(
+                color = peakColor,
+                radius = Dimens.ChartPeakRadius.toPx(),
+                center = Offset(x, y)
+            )
+        }
     }
 }

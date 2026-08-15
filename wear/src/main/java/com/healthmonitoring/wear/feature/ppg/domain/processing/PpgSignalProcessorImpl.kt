@@ -4,7 +4,9 @@ import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgChannelSubtraction
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgDcRemovalType
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessingResult
 import javax.inject.Inject
 
 class PpgSignalProcessorImpl @Inject constructor(
@@ -25,7 +27,12 @@ class PpgSignalProcessorImpl @Inject constructor(
     private var centeredCurrentIndex = 0
     private var centeredWindowSum = 0.0
 
-    override fun process(measurement: PpgMeasurement): List<PpgProcessedMeasurement> {
+    // Peak detection
+    private var previousPreviousProcessedSample: PpgProcessedMeasurement? = null
+    private var previousProcessedSample: PpgProcessedMeasurement? = null
+    private val detectedPeaks = mutableListOf<PpgPeak>()
+
+    override fun process(measurement: PpgMeasurement): List<PpgProcessingResult> {
         val channelSubtractedSample = SignalSample(
             value = calculateChannelSubtraction(measurement),
             timestamp = measurement.timestamp
@@ -41,9 +48,14 @@ class PpgSignalProcessorImpl @Inject constructor(
                 timestamp = sample.timestamp
             )
 
-            PpgProcessedMeasurement(
+            val processedMeasurement = PpgProcessedMeasurement(
                 value = invertSignal(filteredValue),
                 timestamp = sample.timestamp
+            )
+
+            PpgProcessingResult(
+                measurement = processedMeasurement,
+                peak = detectPeak(processedMeasurement)
             )
         }
     }
@@ -52,6 +64,7 @@ class PpgSignalProcessorImpl @Inject constructor(
         resetCausalWindow()
         resetCenteredWindow()
         ppgSignalFilter.reset()
+        resetPeaks()
     }
 
     private fun calculateChannelSubtraction(measurement: PpgMeasurement): Double {
@@ -165,6 +178,61 @@ class PpgSignalProcessorImpl @Inject constructor(
         centeredEndIndex = 0
         centeredCurrentIndex = 0
         centeredWindowSum = 0.0
+    }
+
+    private fun detectPeak(sample: PpgProcessedMeasurement): PpgPeak? {
+        if (!PpgConfig.PEAK_DETECTION_ENABLED) {
+            return null
+        }
+
+        val previousPreviousSample = previousPreviousProcessedSample
+        val previousSample = previousProcessedSample
+
+        previousPreviousProcessedSample = previousSample
+        previousProcessedSample = sample
+
+        if (previousPreviousSample == null || previousSample == null) {
+            return null
+        }
+
+        val isLocalPeak =
+            previousSample.value > previousPreviousSample.value &&
+                    previousSample.value >= sample.value
+
+        if (!isLocalPeak || previousSample.value < PpgConfig.PEAK_MIN_HEIGHT) {
+            return null
+        }
+
+        val peak = PpgPeak(
+            value = previousSample.value,
+            timestamp = previousSample.timestamp
+        )
+
+        if (detectedPeaks.isEmpty()) {
+            detectedPeaks.add(peak)
+            return peak
+        }
+
+        val previousPeak = detectedPeaks.last()
+        val distanceFromPreviousPeak = peak.timestamp - previousPeak.timestamp
+
+        if (distanceFromPreviousPeak >= PpgConfig.PEAK_MIN_DISTANCE_MILLIS) {
+            detectedPeaks.add(peak)
+            return peak
+        }
+
+        if (peak.value > previousPeak.value) {
+            detectedPeaks[detectedPeaks.lastIndex] = peak
+            return peak
+        }
+
+        return null
+    }
+
+    private fun resetPeaks() {
+        previousPreviousProcessedSample = null
+        previousProcessedSample = null
+        detectedPeaks.clear()
     }
 
     private fun invertSignal(value: Double): Double {

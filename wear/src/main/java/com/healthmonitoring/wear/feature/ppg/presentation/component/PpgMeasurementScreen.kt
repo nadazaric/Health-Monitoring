@@ -68,7 +68,8 @@ fun PpgMeasurementScreen(
                 )
 
                 PpgSignalChart(
-                    measurements = state.chartMeasurements
+                    measurements = state.chartMeasurements,
+                    peaks = state.chartPeaks
                 )
             }
 

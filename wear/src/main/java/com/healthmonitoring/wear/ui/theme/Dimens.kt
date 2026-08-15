@@ -18,4 +18,5 @@ object Dimens {
     // Chart
     val ChartHeight = 80.dp
     val ChartStrokeWidth = 2.dp
+    val ChartPeakRadius = 3.dp
 }

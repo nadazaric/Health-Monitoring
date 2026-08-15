@@ -1,13 +1,15 @@
 package com.healthmonitoring.wear.feature.ppg.presentation
 
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
 
 data class PpgState(
     val chartMeasurements: List<PpgProcessedMeasurement> = emptyList(),
     val remainingTimeMillis: Long = PpgConfig.MEASUREMENT_DURATION_MILLIS,
     val measurementPhase: PpgMeasurementPhase = PpgMeasurementPhase.IDLE,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val chartPeaks: List<PpgPeak> = emptyList(),
 ) {
     val isMeasurementActive: Boolean
         get() = measurementPhase == PpgMeasurementPhase.STARTUP_TRIM ||

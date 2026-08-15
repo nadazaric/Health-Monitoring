@@ -28,4 +28,8 @@ object PpgConfig {
     const val LOW_PASS_CUTOFF_HZ = 5.0
     const val LOW_PASS_FILTER_PASSES = 1
 
+    const val PEAK_DETECTION_ENABLED = true
+    const val PEAK_MIN_DISTANCE_MILLIS = 400L
+    const val PEAK_MIN_HEIGHT = 0.0
+
 }
