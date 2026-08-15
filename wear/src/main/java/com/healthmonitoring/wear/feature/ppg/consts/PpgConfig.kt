@@ -14,8 +14,9 @@ object PpgConfig {
     const val MEASUREMENT_DURATION_MILLIS = 10_000L
     const val COUNTDOWN_INTERVAL_MILLIS = 1_000L
 
+    // Algorithm parameters
+    const val INVERT_PROCESSED_SIGNAL = true
     val CHANNEL_SUBTRACTION = PpgChannelSubtraction.RED_INFRARED_MEAN
-
     val DC_REMOVAL_TYPE = PpgDcRemovalType.CENTERED
     const val DC_REMOVAL_WINDOW_MILLIS = 2_000L
 

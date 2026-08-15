@@ -36,7 +36,7 @@ class PpgSignalProcessorImpl @Inject constructor() :
 
         return dcRemovedSamples.map { sample ->
             PpgProcessedMeasurement(
-                value = sample.value,
+                value = invertSignal(sample.value),
                 timestamp = sample.timestamp
             )
         }
@@ -158,5 +158,13 @@ class PpgSignalProcessorImpl @Inject constructor() :
         centeredEndIndex = 0
         centeredCurrentIndex = 0
         centeredWindowSum = 0.0
+    }
+
+    private fun invertSignal(value: Double): Double {
+        return if (PpgConfig.INVERT_PROCESSED_SIGNAL) {
+            -value
+        } else {
+            value
+        }
     }
 }
