@@ -1,12 +1,26 @@
 package com.healthmonitoring.wear.feature.ppg.presentation
 
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
 
 data class PpgState(
-    val measurement: PpgMeasurement? = null,
+    val chartMeasurements: List<PpgProcessedMeasurement> = emptyList(),
     val remainingTimeMillis: Long = PpgConfig.MEASUREMENT_DURATION_MILLIS,
-    val isMeasuring: Boolean = false,
-    val isMeasurementCompleted: Boolean = false,
+    val measurementPhase: PpgMeasurementPhase = PpgMeasurementPhase.IDLE,
     val errorMessage: String? = null
-)
+) {
+    val isMeasurementActive: Boolean
+        get() = measurementPhase == PpgMeasurementPhase.STARTUP_TRIM ||
+                measurementPhase == PpgMeasurementPhase.PROCESSING_WARMUP ||
+                measurementPhase == PpgMeasurementPhase.MEASURING
+
+    val isPreparing: Boolean
+        get() = measurementPhase == PpgMeasurementPhase.STARTUP_TRIM ||
+                measurementPhase == PpgMeasurementPhase.PROCESSING_WARMUP
+
+    val isMeasuring: Boolean
+        get() = measurementPhase == PpgMeasurementPhase.MEASURING
+
+    val isMeasurementCompleted: Boolean
+        get() = measurementPhase == PpgMeasurementPhase.COMPLETED
+}

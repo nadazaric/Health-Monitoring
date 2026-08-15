@@ -7,6 +7,8 @@ import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSenderImpl
 import com.healthmonitoring.wear.feature.heart_rate.data.repository.HeartRateRepositoryImpl
 import com.healthmonitoring.wear.feature.heart_rate.domain.repository.HeartRateRepository
 import com.healthmonitoring.wear.feature.ppg.data.repository.PpgRepositoryImpl
+import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcessor
+import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcessorImpl
 import com.healthmonitoring.wear.feature.ppg.domain.repository.PpgRepository
 import com.healthmonitoring.wear.feature.skin_temperature.data.repository.SkinTemperatureRepositoryImpl
 import com.healthmonitoring.wear.feature.skin_temperature.domain.repository.SkinTemperatureRepository
@@ -28,6 +30,12 @@ abstract class HealthTrackingModule {
     abstract fun bindHealthTrackerProvider(
         healthTrackerProviderImpl: HealthTrackerProviderImpl
     ): HealthTrackerProvider
+
+    // Processor
+    @Binds
+    abstract fun bindPpgSignalProcessor(
+        ppgSignalProcessorImpl: PpgSignalProcessorImpl
+    ): PpgSignalProcessor
 
     // Repositories
     @Binds

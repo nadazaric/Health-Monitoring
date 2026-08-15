@@ -14,4 +14,8 @@ object Dimens {
     val CardContentSpacing = 14.dp
     val CardCornerRadius = 28.dp
     val CardIconSize = 30.dp
+
+    // Chart
+    val ChartHeight = 80.dp
+    val ChartStrokeWidth = 2.dp
 }

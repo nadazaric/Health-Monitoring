@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.data.export.PpgCsvExporter
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
 import com.healthmonitoring.wear.feature.ppg.domain.use_case.PpgUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -15,18 +16,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcessor
 
 @HiltViewModel
 class PpgViewModel @Inject constructor(
     private val ppgUseCases: PpgUseCases,
+    private val ppgSignalProcessor: PpgSignalProcessor,
     private val ppgCsvExporter: PpgCsvExporter
 ) : ViewModel() {
 
     private val _state = mutableStateOf(PpgState())
     val state: State<PpgState> = _state
 
-    private val rawMeasurements =
-        mutableListOf<PpgMeasurement>()
+    private val rawMeasurements = mutableListOf<PpgMeasurement>()
+    private val chartMeasurements = ArrayDeque<PpgProcessedMeasurement>()
 
     private var measurementTimerJob: Job? = null
 
@@ -39,11 +43,12 @@ class PpgViewModel @Inject constructor(
         cancelMeasurementTimer()
 
         rawMeasurements.clear()
+        chartMeasurements.clear()
+        ppgSignalProcessor.reset()
 
         _state.value = PpgState(
-            remainingTimeMillis =
-                PpgConfig.MEASUREMENT_DURATION_MILLIS,
-            isMeasuring = true
+            remainingTimeMillis = PpgConfig.MEASUREMENT_DURATION_MILLIS,
+            measurementPhase = PpgMeasurementPhase.STARTUP_TRIM
         )
 
         ppgUseCases.startPpgMeasurement()
@@ -59,38 +64,63 @@ class PpgViewModel @Inject constructor(
     private fun observePpg() {
         viewModelScope.launch {
             ppgUseCases.observePpg().collect { measurement ->
-                if (!_state.value.isMeasuring) {
-                    return@collect
+                when (_state.value.measurementPhase) {
+                    PpgMeasurementPhase.STARTUP_TRIM -> {
+                        return@collect
+                    }
+
+                    PpgMeasurementPhase.PROCESSING_WARMUP -> {
+                        ppgSignalProcessor.process(
+                            measurement = measurement
+                        )
+                    }
+
+                    PpgMeasurementPhase.MEASURING -> {
+                        val processedMeasurement = ppgSignalProcessor.process(
+                            measurement = measurement
+                        )
+                        rawMeasurements.add(measurement)
+                        addChartMeasurement(measurement = processedMeasurement)
+                    }
+
+                    PpgMeasurementPhase.IDLE, PpgMeasurementPhase.COMPLETED -> {
+                        return@collect
+                    }
                 }
-
-                rawMeasurements.add(measurement)
-
-                _state.value = _state.value.copy(
-                    measurement = measurement,
-                    errorMessage = null
-                )
             }
         }
     }
 
     private fun startMeasurementTimer() {
         measurementTimerJob = viewModelScope.launch {
-            val measurementStartTime =
-                SystemClock.elapsedRealtime()
+            delay(PpgConfig.STARTUP_TRIM_MILLIS.milliseconds)
 
-            while (
-                isActive &&
-                _state.value.isMeasuring
-            ) {
-                val elapsedTime =
-                    SystemClock.elapsedRealtime() -
-                            measurementStartTime
+            if (!isActive || !_state.value.isMeasurementActive) {
+                return@launch
+            }
+
+            _state.value = _state.value.copy(
+                measurementPhase = PpgMeasurementPhase.PROCESSING_WARMUP
+            )
+
+            delay(PpgConfig.PROCESSING_WARMUP_MILLIS.milliseconds)
+
+            if (!isActive || !_state.value.isMeasurementActive) {
+                return@launch
+            }
+
+            _state.value = _state.value.copy(
+                measurementPhase = PpgMeasurementPhase.MEASURING
+            )
+
+            val measurementStartTime = SystemClock.elapsedRealtime()
+
+            while (isActive && _state.value.isMeasuring) {
+                val elapsedTime = SystemClock.elapsedRealtime() - measurementStartTime
 
                 val remainingTime =
-                    (
-                            PpgConfig.MEASUREMENT_DURATION_MILLIS -
-                                    elapsedTime
-                            ).coerceAtLeast(0L)
+                    (PpgConfig.MEASUREMENT_DURATION_MILLIS - elapsedTime)
+                        .coerceAtLeast(0L)
 
                 _state.value = _state.value.copy(
                     remainingTimeMillis = remainingTime
@@ -103,9 +133,7 @@ class PpgViewModel @Inject constructor(
                     break
                 }
 
-                delay(
-                    PpgConfig.COUNTDOWN_INTERVAL_MILLIS
-                )
+                delay(PpgConfig.COUNTDOWN_INTERVAL_MILLIS.milliseconds)
             }
         }
     }
@@ -120,25 +148,23 @@ class PpgViewModel @Inject constructor(
                     rawMeasurements.clear()
 
                     _state.value = _state.value.copy(
-                        isMeasuring = false,
+                        measurementPhase =
+                            PpgMeasurementPhase.IDLE,
                         errorMessage = message
                     )
                 }
         }
     }
 
-    private fun finishMeasurement(
-        completed: Boolean
-    ) {
-        if (!_state.value.isMeasuring) {
+    private fun finishMeasurement(completed: Boolean) {
+        if (!_state.value.isMeasurementActive) {
             return
         }
 
         ppgUseCases.stopPpgMeasurement()
         cancelMeasurementTimer()
 
-        val measurementsToExport =
-            rawMeasurements.toList()
+        val measurementsToExport = rawMeasurements.toList()
 
         _state.value = _state.value.copy(
             remainingTimeMillis = if (completed) {
@@ -146,8 +172,11 @@ class PpgViewModel @Inject constructor(
             } else {
                 _state.value.remainingTimeMillis
             },
-            isMeasuring = false,
-            isMeasurementCompleted = completed
+            measurementPhase = if (completed) {
+                PpgMeasurementPhase.COMPLETED
+            } else {
+                PpgMeasurementPhase.IDLE
+            }
         )
 
         exportRawMeasurements(
@@ -155,10 +184,8 @@ class PpgViewModel @Inject constructor(
         )
     }
 
-    private fun exportRawMeasurements(
-        measurements: List<PpgMeasurement>
-    ) {
-        if (measurements.isEmpty()) {
+    private fun exportRawMeasurements(measurements: List<PpgMeasurement>) {
+        if (!PpgConfig.CSV_EXPORT_ENABLED || measurements.isEmpty()) {
             return
         }
 
@@ -179,5 +206,24 @@ class PpgViewModel @Inject constructor(
         cancelMeasurementTimer()
 
         super.onCleared()
+    }
+
+    private fun addChartMeasurement(measurement: PpgProcessedMeasurement) {
+        chartMeasurements.addLast(measurement)
+
+        val minimumTimestamp = measurement.timestamp - PpgConfig.CHART_WINDOW_MILLIS
+
+        while (
+            chartMeasurements.isNotEmpty() &&
+            chartMeasurements.first().timestamp <
+            minimumTimestamp
+        ) {
+            chartMeasurements.removeFirst()
+        }
+
+        _state.value = _state.value.copy(
+            chartMeasurements = chartMeasurements.toList(),
+            errorMessage = null
+        )
     }
 }

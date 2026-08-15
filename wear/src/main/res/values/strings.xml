@@ -31,4 +31,6 @@
     <string name="ppg_open_measurement">Open measurement</string>
     <string name="ppg_measurement_completed">Measurement completed</string>
 
+    <string name="ppg_preparing_signal">Preparing signal...</string>
+
 </resources>
