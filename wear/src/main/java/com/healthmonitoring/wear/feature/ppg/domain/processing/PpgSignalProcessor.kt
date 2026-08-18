@@ -8,4 +8,6 @@ interface PpgSignalProcessor {
     fun process(measurement: PpgMeasurement): List<PpgProcessingResult>
 
     fun reset()
+
+    fun resetMeasurementState()
 }

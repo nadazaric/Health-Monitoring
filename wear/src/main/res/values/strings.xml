@@ -32,5 +32,7 @@
     <string name="ppg_measurement_completed">Measurement completed</string>
 
     <string name="ppg_preparing_signal">Preparing signal...</string>
+    <string name="ppg_heart_rate">%1$d BPM</string>
+    <string name="ppg_heart_rate_unavailable">-- BPM</string>
 
 </resources>

@@ -85,9 +85,13 @@ class PpgViewModel @Inject constructor(
                                 addChartPeak(peak)
                             }
 
-                            addChartMeasurement(
-                                measurement = result.measurement
-                            )
+                            addChartMeasurement(measurement = result.measurement)
+
+                            result.heartRate?.let { heartRate ->
+                                _state.value = _state.value.copy(
+                                    heartRate = heartRate
+                                )
+                            }
                         }
                     }
 
@@ -116,6 +120,8 @@ class PpgViewModel @Inject constructor(
             if (!isActive || !_state.value.isMeasurementActive) {
                 return@launch
             }
+
+            ppgSignalProcessor.resetMeasurementState()
 
             _state.value = _state.value.copy(
                 measurementPhase = PpgMeasurementPhase.MEASURING

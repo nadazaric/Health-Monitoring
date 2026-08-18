@@ -32,4 +32,9 @@ object PpgConfig {
     const val PEAK_MIN_DISTANCE_MILLIS = 400L
     const val PEAK_MIN_HEIGHT = 0.0
 
+    const val HEART_RATE_ENABLED = true
+    const val HEART_RATE_AVERAGING_INTERVAL_COUNT = 5
+    const val HEART_RATE_MIN_BPM = 40.0
+    const val HEART_RATE_MAX_BPM = 180.0
+
 }

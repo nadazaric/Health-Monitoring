@@ -1,6 +1,7 @@
 package com.healthmonitoring.wear.feature.ppg.presentation
 
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgHeartRate
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
 
@@ -10,6 +11,7 @@ data class PpgState(
     val measurementPhase: PpgMeasurementPhase = PpgMeasurementPhase.IDLE,
     val errorMessage: String? = null,
     val chartPeaks: List<PpgPeak> = emptyList(),
+    val heartRate: PpgHeartRate? = null,
 ) {
     val isMeasurementActive: Boolean
         get() = measurementPhase == PpgMeasurementPhase.STARTUP_TRIM ||

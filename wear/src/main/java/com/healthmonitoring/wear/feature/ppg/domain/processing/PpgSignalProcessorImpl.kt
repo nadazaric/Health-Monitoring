@@ -3,6 +3,7 @@ package com.healthmonitoring.wear.feature.ppg.domain.processing
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgChannelSubtraction
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgDcRemovalType
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgHeartRate
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
@@ -53,9 +54,12 @@ class PpgSignalProcessorImpl @Inject constructor(
                 timestamp = sample.timestamp
             )
 
+            val peak = detectPeak(processedMeasurement)
+
             PpgProcessingResult(
                 measurement = processedMeasurement,
-                peak = detectPeak(processedMeasurement)
+                peak = peak,
+                heartRate = if (peak != null) calculateHeartRate() else null
             )
         }
     }
@@ -64,6 +68,10 @@ class PpgSignalProcessorImpl @Inject constructor(
         resetCausalWindow()
         resetCenteredWindow()
         ppgSignalFilter.reset()
+        resetPeaks()
+    }
+
+    override fun resetMeasurementState() {
         resetPeaks()
     }
 
@@ -233,6 +241,55 @@ class PpgSignalProcessorImpl @Inject constructor(
         previousPreviousProcessedSample = null
         previousProcessedSample = null
         detectedPeaks.clear()
+    }
+
+    private fun calculateHeartRate(): PpgHeartRate? {
+        if (!PpgConfig.HEART_RATE_ENABLED) {
+            return null
+        }
+
+        if (detectedPeaks.size < 2) {
+            return PpgHeartRate(
+                currentBpm = null,
+                averageBpm = null,
+                peakCount = detectedPeaks.size
+            )
+        }
+
+        val bpmValues = mutableListOf<Double>()
+
+        for (index in 1 until detectedPeaks.size) {
+            val intervalMillis = detectedPeaks[index].timestamp - detectedPeaks[index - 1].timestamp
+
+            if (intervalMillis <= 0) {
+                continue
+            }
+
+            val intervalSeconds = intervalMillis / 1_000.0
+            val bpm = 60.0 / intervalSeconds
+
+            if (bpm in PpgConfig.HEART_RATE_MIN_BPM..PpgConfig.HEART_RATE_MAX_BPM) {
+                bpmValues.add(bpm)
+            }
+        }
+
+        if (bpmValues.isEmpty()) {
+            return PpgHeartRate(
+                currentBpm = null,
+                averageBpm = null,
+                peakCount = detectedPeaks.size
+            )
+        }
+
+        val averagingCount = maxOf(1, PpgConfig.HEART_RATE_AVERAGING_INTERVAL_COUNT)
+
+        val recentBpmValues = bpmValues.takeLast(averagingCount)
+
+        return PpgHeartRate(
+            currentBpm = recentBpmValues.average(),
+            averageBpm = bpmValues.average(),
+            peakCount = detectedPeaks.size
+        )
     }
 
     private fun invertSignal(value: Double): Double {

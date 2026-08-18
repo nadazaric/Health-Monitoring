@@ -18,6 +18,7 @@ import com.healthmonitoring.wear.R
 import com.healthmonitoring.wear.feature.ppg.presentation.PpgViewModel
 import com.healthmonitoring.wear.ui.theme.Dimens
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 @Composable
 fun PpgMeasurementScreen(
@@ -70,6 +71,17 @@ fun PpgMeasurementScreen(
                 PpgSignalChart(
                     measurements = state.chartMeasurements,
                     peaks = state.chartPeaks
+                )
+
+                Text(
+                    text = state.heartRate?.currentBpm?.let { bpm ->
+                        stringResource(
+                            R.string.ppg_heart_rate,
+                            bpm.roundToInt()
+                        )
+                    } ?: stringResource(R.string.ppg_heart_rate_unavailable),
+                    style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
                 )
             }
 
