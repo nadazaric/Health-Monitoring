@@ -19,4 +19,9 @@ object Dimens {
     val ChartHeight = 80.dp
     val ChartStrokeWidth = 3.dp
     val ChartPeakRadius = 3.dp
+
+    val PreparingAnimationSize = 150.dp
+    val PreparingCircleSize = 115.dp
+    val PreparingCircleStrokeWidth = 2.dp
+    val PreparingTextSpacing = 4.dp
 }

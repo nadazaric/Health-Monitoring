@@ -36,41 +36,11 @@ fun PpgCard(
             )
 
             Text(
-                text = getPpgStatusText(state),
+                text = stringResource(R.string.ppp_tap_to_measure),
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-
-            Text(
-                text = stringResource(R.string.ppg_open_measurement),
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
-@Composable
-private fun getPpgStatusText(
-    state: PpgState
-): String {
-    return when {
-        state.errorMessage != null -> {
-            stringResource(R.string.ppg_measurement_failed)
-        }
-
-        state.isMeasuring -> {
-            stringResource(R.string.ppg_measuring)
-        }
-
-        state.isMeasurementCompleted -> {
-            stringResource(R.string.ppg_measurement_completed)
-        }
-
-        else -> {
-            stringResource(R.string.ppg_ready_to_measure)
         }
     }
 }

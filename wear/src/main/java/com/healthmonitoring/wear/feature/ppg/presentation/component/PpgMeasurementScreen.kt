@@ -1,6 +1,7 @@
 package com.healthmonitoring.wear.feature.ppg.presentation.component
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +12,6 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -40,63 +40,67 @@ fun PpgMeasurementScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .padding(
                 horizontal = Dimens.ScreenHorizontalPadding,
                 vertical = Dimens.ScreenVerticalPadding
-            ),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(
-            space = Dimens.CardSpacing,
-            alignment = Alignment.CenterVertically
-        )
+            )
     ) {
         when {
             state.isPreparing -> {
-                Text(
-                    text = stringResource(R.string.ppg_preparing_signal),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
+                PpgPreparingAnimation(
+                    modifier = Modifier.align(Alignment.Center)
                 )
             }
 
             state.isMeasuring -> {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(
+                        space = Dimens.CardSpacing,
+                        alignment = Alignment.CenterVertically
+                    )
                 ) {
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleLarge,
-                        text = formatRemainingTime(
-                            remainingTimeMillis = state.remainingTimeMillis
-                        ),
-                        textAlign = TextAlign.Center
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = formatRemainingTime(
+                                remainingTimeMillis = state.remainingTimeMillis
+                            ),
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center
+                        )
 
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.titleLarge,
-                        text = state.heartRate?.currentBpm?.let { bpm ->
-                            stringResource(
-                                R.string.ppg_heart_rate,
-                                bpm.roundToInt()
-                            )
-                        } ?: stringResource(R.string.ppg_heart_rate_unavailable),
-                        textAlign = TextAlign.Center
-                    )
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = state.heartRate?.currentBpm?.let { bpm ->
+                                stringResource(
+                                    R.string.ppg_heart_rate,
+                                    bpm.roundToInt()
+                                )
+                            } ?: stringResource(R.string.ppg_heart_rate_unavailable),
+                            style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center
+                        )
+                    }
 
+                    PpgSignalChart(
+                        measurements = state.chartMeasurements,
+                        peaks = state.chartPeaks
+                    )
                 }
-
-                PpgSignalChart(
-                    measurements = state.chartMeasurements,
-                    peaks = state.chartPeaks
-                )
             }
 
             state.isMeasurementCompleted -> {
                 Text(
+                    modifier = Modifier.align(Alignment.Center),
                     text = stringResource(R.string.ppg_measurement_completed),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
@@ -106,6 +110,7 @@ fun PpgMeasurementScreen(
 
         state.errorMessage?.let {
             Text(
+                modifier = Modifier.align(Alignment.BottomCenter),
                 text = stringResource(R.string.ppg_measurement_failed),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall,
