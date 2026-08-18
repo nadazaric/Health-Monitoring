@@ -11,7 +11,7 @@ object PpgConfig {
     const val CSV_EXPORT_ENABLED = false
 
     const val STARTUP_TRIM_MILLIS = 600L
-    const val PROCESSING_WARMUP_MILLIS = 2_000L
+    const val PROCESSING_WARMUP_MILLIS = 4_000L
     const val MEASUREMENT_DURATION_MILLIS = 10_000L
     const val COUNTDOWN_INTERVAL_MILLIS = 1_000L
 

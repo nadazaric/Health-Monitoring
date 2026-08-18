@@ -2,13 +2,16 @@ package com.healthmonitoring.wear.feature.ppg.presentation.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -60,28 +63,35 @@ fun PpgMeasurementScreen(
             }
 
             state.isMeasuring -> {
-                Text(
-                    text = formatRemainingTime(
-                        remainingTimeMillis = state.remainingTimeMillis
-                    ),
-                    style = MaterialTheme.typography.titleLarge,
-                    textAlign = TextAlign.Center
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge,
+                        text = formatRemainingTime(
+                            remainingTimeMillis = state.remainingTimeMillis
+                        ),
+                        textAlign = TextAlign.Center
+                    )
+
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleLarge,
+                        text = state.heartRate?.currentBpm?.let { bpm ->
+                            stringResource(
+                                R.string.ppg_heart_rate,
+                                bpm.roundToInt()
+                            )
+                        } ?: stringResource(R.string.ppg_heart_rate_unavailable),
+                        textAlign = TextAlign.Center
+                    )
+
+                }
 
                 PpgSignalChart(
                     measurements = state.chartMeasurements,
                     peaks = state.chartPeaks
-                )
-
-                Text(
-                    text = state.heartRate?.currentBpm?.let { bpm ->
-                        stringResource(
-                            R.string.ppg_heart_rate,
-                            bpm.roundToInt()
-                        )
-                    } ?: stringResource(R.string.ppg_heart_rate_unavailable),
-                    style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Center
                 )
             }
 
