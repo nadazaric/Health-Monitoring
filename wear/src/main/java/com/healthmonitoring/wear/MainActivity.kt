@@ -60,7 +60,9 @@ fun WearApp() {
 
     HealthMonitoringTheme {
         MonitoringHost {
-            AppScaffold {
+            AppScaffold (
+                timeText = {}
+            ) {
                 if (isPpgScreenVisible) {
                     PpgMeasurementScreen(
                         viewModel = ppgViewModel
