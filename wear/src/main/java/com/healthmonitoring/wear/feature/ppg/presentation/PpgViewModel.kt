@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.data.export.PpgCsvExporter
+import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgBreathingPhase
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
@@ -36,6 +37,8 @@ class PpgViewModel @Inject constructor(
 
     private var measurementTimerJob: Job? = null
 
+    private var breathingJob: Job? = null
+
     init {
         observePpg()
         observeMeasurementErrors()
@@ -43,6 +46,7 @@ class PpgViewModel @Inject constructor(
 
     fun startMeasurement() {
         cancelMeasurementTimer()
+        cancelBreathingGuidance()
 
         rawMeasurements.clear()
         chartMeasurements.clear()
@@ -79,13 +83,20 @@ class PpgViewModel @Inject constructor(
                     }
 
                     PpgMeasurementPhase.MEASURING -> {
-                        val processingResults = ppgSignalProcessor.process(measurement = measurement)
+                        val processingResults = ppgSignalProcessor.process(
+                            measurement = measurement
+                        )
+
+                        rawMeasurements.add(measurement)
+
                         processingResults.forEach { result ->
                             result.peak?.let { peak ->
                                 addChartPeak(peak)
                             }
 
-                            addChartMeasurement(measurement = result.measurement)
+                            addChartMeasurement(
+                                measurement = result.measurement
+                            )
 
                             result.heartRate?.let { heartRate ->
                                 _state.value = _state.value.copy(
@@ -127,6 +138,8 @@ class PpgViewModel @Inject constructor(
                 measurementPhase = PpgMeasurementPhase.MEASURING
             )
 
+            startBreathingGuidance()
+
             val measurementStartTime = SystemClock.elapsedRealtime()
 
             while (isActive && _state.value.isMeasuring) {
@@ -159,11 +172,12 @@ class PpgViewModel @Inject constructor(
                 .collect { message ->
                     ppgUseCases.stopPpgMeasurement()
                     cancelMeasurementTimer()
+                    cancelBreathingGuidance()
                     rawMeasurements.clear()
 
                     _state.value = _state.value.copy(
-                        measurementPhase =
-                            PpgMeasurementPhase.IDLE,
+                        measurementPhase = PpgMeasurementPhase.IDLE,
+                        breathingPhase = null,
                         errorMessage = message
                     )
                 }
@@ -190,12 +204,15 @@ class PpgViewModel @Inject constructor(
                 PpgMeasurementPhase.COMPLETED
             } else {
                 PpgMeasurementPhase.IDLE
-            }
+            },
+            breathingPhase = null
         )
 
         exportRawMeasurements(
             measurements = measurementsToExport
         )
+
+        cancelBreathingGuidance()
     }
 
     private fun exportRawMeasurements(measurements: List<PpgMeasurement>) {
@@ -218,6 +235,7 @@ class PpgViewModel @Inject constructor(
     override fun onCleared() {
         ppgUseCases.stopPpgMeasurement()
         cancelMeasurementTimer()
+        cancelBreathingGuidance()
 
         super.onCleared()
     }
@@ -250,5 +268,51 @@ class PpgViewModel @Inject constructor(
         }
 
         chartPeaks.addLast(peak)
+    }
+
+    private fun getBreathingPhaseDuration(phase: PpgBreathingPhase): Long {
+        return when (phase) {
+            PpgBreathingPhase.INHALE ->
+                PpgConfig.BREATHING_INHALE_DURATION_MILLIS
+
+            PpgBreathingPhase.INHALE_HOLD ->
+                PpgConfig.BREATHING_INHALE_HOLD_DURATION_MILLIS
+
+            PpgBreathingPhase.EXHALE ->
+                PpgConfig.BREATHING_EXHALE_DURATION_MILLIS
+
+            PpgBreathingPhase.EXHALE_HOLD ->
+                PpgConfig.BREATHING_EXHALE_HOLD_DURATION_MILLIS
+        }
+    }
+
+    private fun startBreathingGuidance() {
+        breathingJob?.cancel()
+
+        breathingJob = viewModelScope.launch {
+            val phases = PpgBreathingPhase.entries
+
+            while (isActive && _state.value.isMeasuring) {
+                phases.forEach { phase ->
+                    if (!isActive || !_state.value.isMeasuring) {
+                        return@launch
+                    }
+
+                    val durationMillis = getBreathingPhaseDuration(phase)
+
+                    if (durationMillis <= 0L) {
+                        return@forEach
+                    }
+
+                    _state.value = _state.value.copy(breathingPhase = phase)
+                    delay(durationMillis.milliseconds)
+                }
+            }
+        }
+    }
+
+    private fun cancelBreathingGuidance() {
+        breathingJob?.cancel()
+        breathingJob = null
     }
 }

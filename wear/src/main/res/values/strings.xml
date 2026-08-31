@@ -29,4 +29,8 @@
     <string name="ppg_preparing_stay_still">Stay still</string>
     <string name="ppp_tap_to_measure">Tap to measure</string>
 
+    <string name="ppg_breathing_inhale">Inhale</string>
+    <string name="ppg_breathing_hold">Hold</string>
+    <string name="ppg_breathing_exhale">Exhale</string>
+
 </resources>

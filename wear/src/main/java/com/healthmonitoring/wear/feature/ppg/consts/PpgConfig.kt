@@ -12,7 +12,7 @@ object PpgConfig {
 
     const val STARTUP_TRIM_MILLIS = 600L
     const val PROCESSING_WARMUP_MILLIS = 4_000L
-    const val MEASUREMENT_DURATION_MILLIS = 10_000L
+    const val MEASUREMENT_DURATION_MILLIS = 30_000L
     const val COUNTDOWN_INTERVAL_MILLIS = 1_000L
 
     // Algorithm parameters
@@ -36,5 +36,11 @@ object PpgConfig {
     const val HEART_RATE_AVERAGING_INTERVAL_COUNT = 5
     const val HEART_RATE_MIN_BPM = 40.0
     const val HEART_RATE_MAX_BPM = 180.0
+
+    // Breathing
+    const val BREATHING_INHALE_DURATION_MILLIS = 4_000L
+    const val BREATHING_INHALE_HOLD_DURATION_MILLIS = 0
+    const val BREATHING_EXHALE_DURATION_MILLIS = 6_000L
+    const val BREATHING_EXHALE_HOLD_DURATION_MILLIS = 0
 
 }

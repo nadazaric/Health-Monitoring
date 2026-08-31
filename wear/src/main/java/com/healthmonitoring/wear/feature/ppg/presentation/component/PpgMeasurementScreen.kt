@@ -18,6 +18,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import com.healthmonitoring.wear.R
+import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgBreathingPhase
 import com.healthmonitoring.wear.feature.ppg.presentation.PpgViewModel
 import com.healthmonitoring.wear.ui.theme.Dimens
 import kotlin.math.ceil
@@ -87,6 +88,20 @@ fun PpgMeasurementScreen(
                                 )
                             } ?: stringResource(R.string.ppg_heart_rate_unavailable),
                             style = MaterialTheme.typography.titleLarge,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+
+                    state.breathingPhase?.let { phase ->
+                        Text(
+                            text = when (phase) {
+                                PpgBreathingPhase.INHALE -> stringResource(R.string.ppg_breathing_inhale)
+                                PpgBreathingPhase.EXHALE -> stringResource(R.string.ppg_breathing_exhale)
+                                PpgBreathingPhase.INHALE_HOLD, PpgBreathingPhase.EXHALE_HOLD ->
+                                    stringResource(R.string.ppg_breathing_hold)
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center
                         )
                     }
