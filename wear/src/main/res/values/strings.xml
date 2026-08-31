@@ -32,5 +32,11 @@
     <string name="ppg_breathing_inhale">Inhale</string>
     <string name="ppg_breathing_hold">Hold</string>
     <string name="ppg_breathing_exhale">Exhale</string>
+    <string name="ppg_bpm">BPM</string>
+
+    <string name="ppg_breathing_inhale_description">Breathe in slowly</string>
+    <string name="ppg_breathing_inhale_hold_description">Hold your breath</string>
+    <string name="ppg_breathing_exhale_description">Breathe out slowly</string>
+    <string name="ppg_breathing_exhale_hold_description">Stay relaxed</string>
 
 </resources>
