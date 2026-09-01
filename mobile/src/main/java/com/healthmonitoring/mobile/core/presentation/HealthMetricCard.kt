@@ -3,8 +3,8 @@ package com.healthmonitoring.mobile.core.presentation
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -26,8 +26,8 @@ fun HealthMetricCard(
     @DrawableRes iconId: Int,
     @StringRes iconDescriptionId: Int,
     modifier: Modifier = Modifier,
-    iconTint: Color = Color.Black,
-    content: @Composable ColumnScope.() -> Unit
+    iconTint: Color = MaterialTheme.colorScheme.onSurface,
+    content: @Composable RowScope.() -> Unit
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -41,17 +41,15 @@ fun HealthMetricCard(
             defaultElevation = Dimens.CardElevation
         )
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
                     horizontal = Dimens.CardHorizontalContentPadding,
                     vertical = Dimens.CardVerticalContentPadding
                 ),
-            verticalArrangement = Arrangement.spacedBy(
-                Dimens.CardContentSpacing
-            ),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimens.CardContentSpacing)
         ) {
             Icon(
                 modifier = Modifier.size(Dimens.CardIconSize),

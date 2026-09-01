@@ -19,13 +19,14 @@ fun SpO2Card(
     val state = viewModel.state.value
 
     HealthMetricCard(
-        iconId = R.drawable.ic_oxygen,
+        iconId = R.drawable.ic_spo2,
         iconDescriptionId = R.string.spo2_description,
         modifier = modifier
     ) {
         Text(
             text = getSpO2Text(state),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

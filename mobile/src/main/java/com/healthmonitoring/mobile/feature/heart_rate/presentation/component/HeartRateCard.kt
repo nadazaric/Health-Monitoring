@@ -25,7 +25,8 @@ fun HeartRateCard(
     ) {
         Text(
             text = getHeartRateText(state),
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
