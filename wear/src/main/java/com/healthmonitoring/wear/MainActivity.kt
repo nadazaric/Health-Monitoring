@@ -65,7 +65,10 @@ fun WearApp() {
             ) {
                 if (isPpgScreenVisible) {
                     PpgMeasurementScreen(
-                        viewModel = ppgViewModel
+                        viewModel = ppgViewModel,
+                        onMeasurementCompleted = {
+                            isPpgScreenVisible = false
+                        }
                     )
                 } else {
                     HealthMetricsScreen(

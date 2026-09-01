@@ -22,20 +22,31 @@ import androidx.wear.compose.material3.Icon
 import androidx.wear.compose.material3.MaterialTheme
 import androidx.wear.compose.material3.Text
 import com.healthmonitoring.wear.R
+import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgBreathingPhase
 import com.healthmonitoring.wear.feature.ppg.presentation.PpgViewModel
 import com.healthmonitoring.wear.ui.theme.Dimens
+import kotlinx.coroutines.delay
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun PpgMeasurementScreen(
     modifier: Modifier = Modifier,
-    viewModel: PpgViewModel = hiltViewModel()
+    viewModel: PpgViewModel = hiltViewModel(),
+    onMeasurementCompleted: () -> Unit
 ) {
     val state = viewModel.state.value
 
     LaunchedEffect(Unit) {
         viewModel.startMeasurement()
+    }
+
+    LaunchedEffect(state.isMeasurementCompleted) {
+        if (state.isMeasurementCompleted) {
+            delay(PpgConfig.MEASUREMENT_COMPLETED_DISPLAY_MILLIS.milliseconds)
+            onMeasurementCompleted()
+        }
     }
 
     DisposableEffect(Unit) {

@@ -13,6 +13,7 @@ object PpgConfig {
     const val STARTUP_TRIM_MILLIS = 600L
     const val PROCESSING_WARMUP_MILLIS = 4_000L
     const val MEASUREMENT_DURATION_MILLIS = 30_000L
+    const val MEASUREMENT_COMPLETED_DISPLAY_MILLIS = 2_000L
     const val COUNTDOWN_INTERVAL_MILLIS = 1_000L
 
     // Algorithm parameters
