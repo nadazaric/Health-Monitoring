@@ -8,9 +8,9 @@ import androidx.lifecycle.viewModelScope
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.data.export.PpgCsvExporter
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgBreathingPhase
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedSample
 import com.healthmonitoring.wear.feature.ppg.domain.use_case.PpgUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -31,8 +31,8 @@ class PpgViewModel @Inject constructor(
     private val _state = mutableStateOf(PpgState())
     val state: State<PpgState> = _state
 
-    private val rawMeasurements = mutableListOf<PpgMeasurement>()
-    private val chartMeasurements = ArrayDeque<PpgProcessedMeasurement>()
+    private val rawMeasurements = mutableListOf<PpgRawSample>()
+    private val chartMeasurements = ArrayDeque<PpgProcessedSample>()
     private val chartPeaks = ArrayDeque<PpgPeak>()
 
     private var measurementTimerJob: Job? = null
@@ -215,7 +215,7 @@ class PpgViewModel @Inject constructor(
         cancelBreathingGuidance()
     }
 
-    private fun exportRawMeasurements(measurements: List<PpgMeasurement>) {
+    private fun exportRawMeasurements(measurements: List<PpgRawSample>) {
         if (!PpgConfig.CSV_EXPORT_ENABLED || measurements.isEmpty()) {
             return
         }
@@ -240,7 +240,7 @@ class PpgViewModel @Inject constructor(
         super.onCleared()
     }
 
-    private fun addChartMeasurement(measurement: PpgProcessedMeasurement) {
+    private fun addChartMeasurement(measurement: PpgProcessedSample) {
         chartMeasurements.addLast(measurement)
 
         val minimumTimestamp = measurement.timestamp - PpgConfig.CHART_WINDOW_MILLIS

@@ -4,9 +4,9 @@ import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgChannelSubtraction
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgDcRemovalType
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgHeartRate
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedSample
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessingResult
 import javax.inject.Inject
 
@@ -29,11 +29,11 @@ class PpgSignalProcessorImpl @Inject constructor(
     private var centeredWindowSum = 0.0
 
     // Peak detection
-    private var previousPreviousProcessedSample: PpgProcessedMeasurement? = null
-    private var previousProcessedSample: PpgProcessedMeasurement? = null
+    private var previousPreviousProcessedSample: PpgProcessedSample? = null
+    private var previousProcessedSample: PpgProcessedSample? = null
     private val detectedPeaks = mutableListOf<PpgPeak>()
 
-    override fun process(measurement: PpgMeasurement): List<PpgProcessingResult> {
+    override fun process(measurement: PpgRawSample): List<PpgProcessingResult> {
         val channelSubtractedSample = SignalSample(
             value = calculateChannelSubtraction(measurement),
             timestamp = measurement.timestamp
@@ -49,7 +49,7 @@ class PpgSignalProcessorImpl @Inject constructor(
                 timestamp = sample.timestamp
             )
 
-            val processedMeasurement = PpgProcessedMeasurement(
+            val processedMeasurement = PpgProcessedSample(
                 value = invertSignal(filteredValue),
                 timestamp = sample.timestamp
             )
@@ -75,7 +75,7 @@ class PpgSignalProcessorImpl @Inject constructor(
         resetPeaks()
     }
 
-    private fun calculateChannelSubtraction(measurement: PpgMeasurement): Double {
+    private fun calculateChannelSubtraction(measurement: PpgRawSample): Double {
         return when (PpgConfig.CHANNEL_SUBTRACTION) {
             PpgChannelSubtraction.NONE ->
                 measurement.green.toDouble()
@@ -188,7 +188,7 @@ class PpgSignalProcessorImpl @Inject constructor(
         centeredWindowSum = 0.0
     }
 
-    private fun detectPeak(sample: PpgProcessedMeasurement): PpgPeak? {
+    private fun detectPeak(sample: PpgProcessedSample): PpgPeak? {
         if (!PpgConfig.PEAK_DETECTION_ENABLED) {
             return null
         }

@@ -4,10 +4,10 @@ import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgBreathingPhase
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgHeartRate
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedSample
 
 data class PpgState(
-    val chartMeasurements: List<PpgProcessedMeasurement> = emptyList(),
+    val chartMeasurements: List<PpgProcessedSample> = emptyList(),
     val remainingTimeMillis: Long = PpgConfig.MEASUREMENT_DURATION_MILLIS,
     val measurementPhase: PpgMeasurementPhase = PpgMeasurementPhase.IDLE,
     val errorMessage: String? = null,

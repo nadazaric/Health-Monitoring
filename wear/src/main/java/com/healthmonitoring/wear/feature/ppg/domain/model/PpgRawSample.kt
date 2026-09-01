@@ -1,6 +1,6 @@
 package com.healthmonitoring.wear.feature.ppg.domain.model
 
-data class PpgMeasurement(
+data class PpgRawSample(
     val green: Int,
     val red: Int,
     val infrared: Int,

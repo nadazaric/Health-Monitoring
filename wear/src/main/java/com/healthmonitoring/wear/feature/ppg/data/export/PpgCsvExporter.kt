@@ -1,7 +1,7 @@
 package com.healthmonitoring.wear.feature.ppg.data.export
 
 import android.content.Context
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -18,7 +18,7 @@ class PpgCsvExporter @Inject constructor(
 ) {
 
     suspend fun export(
-        measurements: List<PpgMeasurement>
+        measurements: List<PpgRawSample>
     ): File = withContext(Dispatchers.IO) {
         val exportDirectory = File(
             context.filesDir,

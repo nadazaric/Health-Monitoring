@@ -5,7 +5,7 @@ import android.os.Looper
 import android.util.Log
 import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.core.HealthTrackerProvider
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import com.samsung.android.service.health.tracking.HealthTracker
 import com.samsung.android.service.health.tracking.data.DataPoint
 import com.samsung.android.service.health.tracking.data.HealthTrackerType
@@ -23,7 +23,7 @@ class PpgListener @Inject constructor(
     private val ppgHandler = Handler(Looper.getMainLooper())
 
     private var onPpgMeasuredCallback:
-            ((PpgMeasurement) -> Unit)? = null
+            ((PpgRawSample) -> Unit)? = null
 
     private var onMeasurementFailedCallback:
             ((String) -> Unit)? = null
@@ -48,7 +48,7 @@ class PpgListener @Inject constructor(
                             "timestamp: ${dataPoint.timestamp}"
                 )
 
-                val measurement = PpgMeasurement(
+                val measurement = PpgRawSample(
                     green = green,
                     red = red,
                     infrared = infrared,
@@ -108,7 +108,7 @@ class PpgListener @Inject constructor(
     }
 
     fun setOnPpgMeasuredCallback(
-        callback: (PpgMeasurement) -> Unit
+        callback: (PpgRawSample) -> Unit
     ) {
         onPpgMeasuredCallback = callback
     }

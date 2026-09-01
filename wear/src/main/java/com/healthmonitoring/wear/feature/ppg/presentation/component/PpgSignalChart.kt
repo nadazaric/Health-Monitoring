@@ -11,13 +11,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.wear.compose.material3.MaterialTheme
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgPeak
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedSample
 import com.healthmonitoring.wear.ui.theme.Dimens
 import kotlin.math.max
 
 @Composable
 fun PpgSignalChart(
-    measurements: List<PpgProcessedMeasurement>,
+    measurements: List<PpgProcessedSample>,
     peaks: List<PpgPeak>,
     modifier: Modifier = Modifier
 ) {

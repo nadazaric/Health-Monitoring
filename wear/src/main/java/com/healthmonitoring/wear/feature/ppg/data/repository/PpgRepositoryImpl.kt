@@ -3,7 +3,7 @@ package com.healthmonitoring.wear.feature.ppg.data.repository
 import android.util.Log
 import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.feature.ppg.data.listener.PpgListener
-import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurement
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import com.healthmonitoring.wear.feature.ppg.domain.repository.PpgRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,7 +17,7 @@ class PpgRepositoryImpl @Inject constructor(
 ) : PpgRepository {
 
     private val ppgMeasurements =
-        MutableSharedFlow<PpgMeasurement>(
+        MutableSharedFlow<PpgRawSample>(
             replay = 1,
             extraBufferCapacity = 100
         )
@@ -38,7 +38,7 @@ class PpgRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun observePpg(): Flow<PpgMeasurement> {
+    override fun observePpg(): Flow<PpgRawSample> {
         return ppgMeasurements.asSharedFlow()
     }
 

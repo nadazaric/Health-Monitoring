@@ -7,9 +7,11 @@ import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSenderImpl
 import com.healthmonitoring.wear.feature.heart_rate.data.repository.HeartRateRepositoryImpl
 import com.healthmonitoring.wear.feature.heart_rate.domain.repository.HeartRateRepository
 import com.healthmonitoring.wear.feature.ppg.data.repository.PpgRepositoryImpl
+import com.healthmonitoring.wear.feature.ppg.data.session.PpgSessionCollectorImpl
 import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcessor
 import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcessorImpl
 import com.healthmonitoring.wear.feature.ppg.domain.repository.PpgRepository
+import com.healthmonitoring.wear.feature.ppg.domain.session.PpgSessionCollector
 import com.healthmonitoring.wear.feature.skin_temperature.data.repository.SkinTemperatureRepositoryImpl
 import com.healthmonitoring.wear.feature.skin_temperature.domain.repository.SkinTemperatureRepository
 import com.healthmonitoring.wear.feature.spo2.data.repository.SpO2RepositoryImpl
@@ -36,6 +38,12 @@ abstract class HealthTrackingModule {
     abstract fun bindPpgSignalProcessor(
         ppgSignalProcessorImpl: PpgSignalProcessorImpl
     ): PpgSignalProcessor
+
+    // Collector
+    @Binds
+    abstract fun bindPpgSessionCollector(
+        implementation: PpgSessionCollectorImpl
+    ): PpgSessionCollector
 
     // Repositories
     @Binds
