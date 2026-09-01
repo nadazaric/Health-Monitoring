@@ -3,8 +3,8 @@ package com.healthmonitoring.wear.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // Primary - Turquoise
-val Turquoise = Color(0xFF23BBB7)
-val TurquoiseDim = Color(0xFF199591)
+val Turquoise = Color(0xFF199591)
+val TurquoiseDim = Color(0xFF15827E)
 val TurquoiseContainer = Color(0xFF123D3C)
 val OnTurquoise = Color(0xFF001F1E)
 val OnTurquoiseContainer = Color(0xFFC2F5F2)
