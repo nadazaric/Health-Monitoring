@@ -30,7 +30,7 @@ fun SpO2Card(
     val textAlpha = getTextAlpha(state)
 
     HealthMetricCard(
-        iconId = R.drawable.ic_oxygen,
+        iconId = R.drawable.ic_spo2,
         iconDescriptionId = R.string.spo2_description,
         modifier = modifier,
         enabled = !state.isMeasuring,

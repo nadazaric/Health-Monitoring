@@ -22,7 +22,7 @@ fun PpgCard(
     val state = viewModel.state.value
 
     HealthMetricCard(
-        iconId = R.drawable.ic_heart,
+        iconId = R.drawable.ic_ppg,
         iconDescriptionId = R.string.ppg_description,
         modifier = modifier,
         onClick = onClick
