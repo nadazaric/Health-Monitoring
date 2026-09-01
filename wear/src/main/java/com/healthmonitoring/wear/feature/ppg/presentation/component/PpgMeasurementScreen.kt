@@ -4,11 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -16,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.wear.compose.material3.Icon
@@ -55,66 +55,51 @@ fun PpgMeasurementScreen(
             }
 
             state.isMeasuring -> {
-                state.breathingPhase?.let { phase ->
-                    PpgBreathingProgressRing(
-                        phase = phase,
-                        modifier = Modifier.matchParentSize()
-                    )
-                }
-
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(
                             horizontal = Dimens.ScreenHorizontalPadding,
-                            vertical = Dimens.ScreenVerticalPadding
+                            vertical = Dimens.ScreenVerticalPadding / 2
                         ),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(Dimens.CardSpacing)
                 ) {
-                    Spacer(
-                        modifier = Modifier.height(Dimens.BreathingTopSpacing)
-                    )
-
                     state.breathingPhase?.let { phase ->
                         Text(
                             text = when (phase) {
                                 PpgBreathingPhase.INHALE ->
                                     stringResource(R.string.ppg_breathing_inhale)
-
-                                PpgBreathingPhase.INHALE_HOLD,
-                                PpgBreathingPhase.EXHALE_HOLD ->
+                                PpgBreathingPhase.INHALE_HOLD, PpgBreathingPhase.EXHALE_HOLD ->
                                     stringResource(R.string.ppg_breathing_hold)
-
-                                PpgBreathingPhase.EXHALE ->
-                                    stringResource(R.string.ppg_breathing_exhale)
+                                PpgBreathingPhase.EXHALE -> stringResource(R.string.ppg_breathing_exhale)
                             },
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.secondary,
                             textAlign = TextAlign.Center
                         )
                     }
 
-                    Spacer(
-                        modifier = Modifier.height(Dimens.HeartRateTopSpacing)
-                    )
-
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(Dimens.HeartRateLabelSpacing)
+                        verticalArrangement = Arrangement.spacedBy(Dimens.SmallSpacing)
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(Dimens.HeartRateValueSpacing)
+                            horizontalArrangement = Arrangement.spacedBy(Dimens.SmallSpacing),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
+                                modifier = Modifier.size(Dimens.IconSize),
                                 painter = painterResource(R.drawable.ic_heart),
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.height(Dimens.HeartRateIconSize)
+                                tint = MaterialTheme.colorScheme.primary
                             )
 
                             Text(
-                                text = state.heartRate?.currentBpm?.roundToInt()?.toString() ?: "--",
+                                text = state.heartRate?.currentBpm
+                                    ?.roundToInt()
+                                    ?.toString() ?: "--",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -128,27 +113,24 @@ fun PpgMeasurementScreen(
                         )
                     }
 
-                    Spacer(
-                        modifier = Modifier.height(Dimens.GraphTopSpacing)
-                    )
-
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f),
-                        contentAlignment = Alignment.BottomCenter
+                        contentAlignment = Alignment.Center
                     ) {
                         PpgSignalChart(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(
-                                    horizontal = Dimens.ChartHorizontalInset,
-                                    vertical = Dimens.ChartVerticalInset
-                                ),
                             measurements = state.chartMeasurements,
                             peaks = state.chartPeaks
                         )
                     }
+                }
+
+                state.breathingPhase?.let { phase ->
+                    PpgBreathingProgressRing(
+                        phase = phase,
+                        modifier = Modifier.matchParentSize()
+                    )
                 }
             }
 

@@ -21,22 +21,14 @@
 
     <!-- PPG -->
     <string name="ppg_description">PPG</string>
+    <string name="ppp_tap_to_measure">Tap to measure</string>
     <string name="ppg_measurement_failed">Try again</string>
     <string name="ppg_measurement_completed">Measurement completed</string>
-    <string name="ppg_heart_rate">%1$d BPM</string>
-    <string name="ppg_heart_rate_unavailable">-- BPM</string>
     <string name="ppg_preparing_relax">Relax</string>
     <string name="ppg_preparing_stay_still">Stay still</string>
-    <string name="ppp_tap_to_measure">Tap to measure</string>
-
-    <string name="ppg_breathing_inhale">Inhale</string>
-    <string name="ppg_breathing_hold">Hold</string>
-    <string name="ppg_breathing_exhale">Exhale</string>
+    <string name="ppg_breathing_inhale">INHALE</string>
+    <string name="ppg_breathing_hold">HOLD</string>
+    <string name="ppg_breathing_exhale">EXHALE</string>
     <string name="ppg_bpm">BPM</string>
-
-    <string name="ppg_breathing_inhale_description">Breathe in slowly</string>
-    <string name="ppg_breathing_inhale_hold_description">Hold your breath</string>
-    <string name="ppg_breathing_exhale_description">Breathe out slowly</string>
-    <string name="ppg_breathing_exhale_hold_description">Stay relaxed</string>
 
 </resources>

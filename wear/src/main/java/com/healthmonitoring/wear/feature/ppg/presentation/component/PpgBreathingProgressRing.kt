@@ -58,8 +58,8 @@ fun PpgBreathingProgressRing(
         }
     }
 
-    val progressColor = MaterialTheme.colorScheme.primary
-    val trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+    val progressColor = MaterialTheme.colorScheme.secondary
+    val trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f)
 
     Canvas(
         modifier = modifier
