@@ -5,6 +5,7 @@ import android.os.Looper
 import android.util.Log
 import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.core.HealthTrackerProvider
+import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import com.samsung.android.service.health.tracking.HealthTracker
 import com.samsung.android.service.health.tracking.data.DataPoint
@@ -28,9 +29,34 @@ class PpgListener @Inject constructor(
     private var onMeasurementFailedCallback:
             ((String) -> Unit)? = null
 
+    private val flushRunnable = object : Runnable {
+        override fun run() {
+            if (ppgTracker == null) {
+                return
+            }
+
+            ppgTracker?.flush()
+
+            ppgHandler.postDelayed(this, PpgConfig.CONTINUOUS_FLUSH_INTERVAL_MILLIS)
+        }
+    }
+
     private val trackerEventListener = object : HealthTracker.TrackerEventListener {
 
         override fun onDataReceived(dataPoints: MutableList<DataPoint>) {
+            val now = System.currentTimeMillis()
+            val firstTimestamp = dataPoints.firstOrNull()?.timestamp
+            val lastTimestamp = dataPoints.lastOrNull()?.timestamp
+
+            Log.d(
+                Tags.PPG_LISTENER,
+                "PPG batch: size=${dataPoints.size}, " +
+                        "first=$firstTimestamp, " +
+                        "last=$lastTimestamp, " +
+                        "now=$now, " +
+                        "lag=${lastTimestamp?.let { now - it }}"
+            )
+
             dataPoints.forEach { dataPoint ->
                 val green = dataPoint.getValue(ValueKey.PpgSet.PPG_GREEN)
                 val greenStatus = dataPoint.getValue(ValueKey.PpgSet.GREEN_STATUS)
@@ -38,15 +64,6 @@ class PpgListener @Inject constructor(
                 val redStatus = dataPoint.getValue(ValueKey.PpgSet.RED_STATUS)
                 val infrared = dataPoint.getValue(ValueKey.PpgSet.PPG_IR)
                 val infraredStatus = dataPoint.getValue(ValueKey.PpgSet.IR_STATUS)
-
-                Log.i(
-                    Tags.PPG_LISTENER,
-                    "Green: $green, green status: $greenStatus, " +
-                            "red: $red, red status: $redStatus, " +
-                            "infrared: $infrared, " +
-                            "infrared status: $infraredStatus, " +
-                            "timestamp: ${dataPoint.timestamp}"
-                )
 
                 val measurement = PpgRawSample(
                     green = green,
@@ -77,7 +94,7 @@ class PpgListener @Inject constructor(
         }
 
         val tracker = healthTrackerProvider.getPpgTracker(
-            healthTrackerType = HealthTrackerType.PPG_ON_DEMAND,
+            healthTrackerType = HealthTrackerType.PPG_CONTINUOUS,
             ppgTypes = setOf(
                 PpgType.GREEN,
                 PpgType.RED,
@@ -95,6 +112,11 @@ class PpgListener @Inject constructor(
 
         ppgHandler.post {
             ppgTracker?.setEventListener(trackerEventListener)
+
+            ppgHandler.postDelayed(
+                flushRunnable,
+                PpgConfig.CONTINUOUS_FLUSH_INTERVAL_MILLIS
+            )
         }
     }
 
@@ -102,6 +124,7 @@ class PpgListener @Inject constructor(
         ppgHandler.post {
             Log.i(Tags.PPG_LISTENER, "Stopping PPG measurement.")
 
+            ppgHandler.removeCallbacks(flushRunnable)
             ppgTracker?.unsetEventListener()
             ppgTracker = null
         }

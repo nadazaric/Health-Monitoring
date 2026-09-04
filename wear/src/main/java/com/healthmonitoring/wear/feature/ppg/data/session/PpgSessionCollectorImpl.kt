@@ -7,7 +7,6 @@ import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurementSession
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedSample
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgSessionSample
-import com.healthmonitoring.wear.feature.ppg.domain.session.PpgSessionCollector
 import java.util.UUID
 import javax.inject.Inject
 
@@ -33,7 +32,9 @@ class PpgSessionCollectorImpl @Inject constructor() : PpgSessionCollector {
     }
 
     override fun addRawSample(sample: PpgRawSample) {
-        if (sessionId == null) {
+        val sessionStart = startedAt ?: return
+
+        if (sample.timestamp < sessionStart) {
             return
         }
 
@@ -62,10 +63,6 @@ class PpgSessionCollectorImpl @Inject constructor() : PpgSessionCollector {
     }
 
     override fun finish(endedAt: Long): PpgMeasurementSession {
-        check(pendingSamples.isEmpty()) {
-            "PPG measurement session contains unprocessed samples."
-        }
-
         val session = PpgMeasurementSession(
             id = requireNotNull(sessionId),
             startedAt = requireNotNull(startedAt),
@@ -73,18 +70,24 @@ class PpgSessionCollectorImpl @Inject constructor() : PpgSessionCollector {
             samples = sessionSamples.toList()
         )
 
+        val rawTimestamps =
+            sessionSamples.map { it.timestamp } + pendingSamples.keys
         Log.d(
             "SESION",
             """
-        PPG SESSION
-        id=${session.id}
-        startedAt=${session.startedAt}
-        endedAt=${session.endedAt}
-        duration=${session.endedAt - session.startedAt} ms
-        samples=${session.samples.size}
-        firstSamples=${session.samples.take(3)}
-        lastSamples=${session.samples.takeLast(3)}
-        """.trimIndent()
+    PPG SESSION
+    id=${session.id}
+    startedAt=${session.startedAt}
+    endedAt=${session.endedAt}
+    duration=${session.endedAt - session.startedAt} ms
+    rawSamples=${rawTimestamps.size}
+    processedSamples=${session.samples.size}
+    pendingSamples=${pendingSamples.size}
+    firstRawTimestamp=${rawTimestamps.minOrNull()}
+    lastRawTimestamp=${rawTimestamps.maxOrNull()}
+    firstProcessedTimestamp=${session.samples.firstOrNull()?.timestamp}
+    lastProcessedTimestamp=${session.samples.lastOrNull()?.timestamp}
+    """.trimIndent()
         )
 
         return session
@@ -128,9 +131,5 @@ class PpgSessionCollectorImpl @Inject constructor() : PpgSessionCollector {
             else ->
                 PpgBreathingPhase.EXHALE_HOLD
         }
-    }
-
-    override fun hasPendingSamples(): Boolean {
-        return pendingSamples.isNotEmpty()
     }
 }

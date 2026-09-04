@@ -15,6 +15,7 @@ object PpgConfig {
     const val MEASUREMENT_DURATION_MILLIS = 30_000L
     const val MEASUREMENT_COMPLETED_DISPLAY_MILLIS = 2_000L
     const val COUNTDOWN_INTERVAL_MILLIS = 1_000L
+    const val CONTINUOUS_FLUSH_INTERVAL_MILLIS = 60L
 
     // Algorithm parameters
     const val INVERT_PROCESSED_SIGNAL = true

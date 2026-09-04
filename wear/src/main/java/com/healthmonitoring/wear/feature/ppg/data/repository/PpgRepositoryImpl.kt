@@ -3,8 +3,11 @@ package com.healthmonitoring.wear.feature.ppg.data.repository
 import android.util.Log
 import com.healthmonitoring.wear.consts.Tags
 import com.healthmonitoring.wear.feature.ppg.data.listener.PpgListener
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedSample
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgRawSample
 import com.healthmonitoring.wear.feature.ppg.domain.repository.PpgRepository
+import com.healthmonitoring.wear.feature.ppg.data.session.PpgSessionCollector
+import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurementSession
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -13,7 +16,8 @@ import javax.inject.Singleton
 
 @Singleton
 class PpgRepositoryImpl @Inject constructor(
-    private val ppgListener: PpgListener
+    private val ppgListener: PpgListener,
+    private val ppgSessionCollector: PpgSessionCollector
 ) : PpgRepository {
 
     private val ppgMeasurements =
@@ -30,6 +34,7 @@ class PpgRepositoryImpl @Inject constructor(
 
     init {
         ppgListener.setOnPpgMeasuredCallback { measurement ->
+            ppgSessionCollector.addRawSample(measurement)
             ppgMeasurements.tryEmit(measurement)
         }
 
@@ -47,20 +52,28 @@ class PpgRepositoryImpl @Inject constructor(
     }
 
     override fun startMeasurement() {
-        Log.d(
-            Tags.PPG_REPOSITORY,
-            "Starting PPG measurement."
-        )
-
+        Log.d(Tags.PPG_REPOSITORY, "Starting PPG measurement.")
         ppgListener.startMeasurement()
     }
 
     override fun stopMeasurement() {
-        Log.d(
-            Tags.PPG_REPOSITORY,
-            "Stopping PPG measurement."
-        )
-
+        Log.d(Tags.PPG_REPOSITORY, "Stopping PPG measurement.")
         ppgListener.stopMeasurement()
+    }
+
+    override fun startSession(startedAt: Long) {
+        ppgSessionCollector.start(startedAt)
+    }
+
+    override fun addProcessedSampleToSession(sample: PpgProcessedSample) {
+        ppgSessionCollector.addProcessedSample(sample)
+    }
+
+    override fun resetSession() {
+        ppgSessionCollector.reset()
+    }
+
+    override fun finishSession(endedAt: Long): PpgMeasurementSession {
+        return ppgSessionCollector.finish(endedAt)
     }
 }

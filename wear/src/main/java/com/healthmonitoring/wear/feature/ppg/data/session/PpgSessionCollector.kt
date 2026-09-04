@@ -1,4 +1,4 @@
-package com.healthmonitoring.wear.feature.ppg.domain.session
+package com.healthmonitoring.wear.feature.ppg.data.session
 
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgMeasurementSession
 import com.healthmonitoring.wear.feature.ppg.domain.model.PpgProcessedSample
@@ -16,6 +16,4 @@ interface PpgSessionCollector {
     fun finish(endedAt: Long): PpgMeasurementSession
 
     fun reset()
-
-    fun hasPendingSamples(): Boolean
 }

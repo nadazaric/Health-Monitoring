@@ -52,6 +52,7 @@ class PpgViewModel @Inject constructor(
         chartMeasurements.clear()
         chartPeaks.clear()
         ppgSignalProcessor.reset()
+        ppgUseCases.resetPpgSession()
 
         _state.value = PpgState(
             remainingTimeMillis = PpgConfig.MEASUREMENT_DURATION_MILLIS,
@@ -63,9 +64,7 @@ class PpgViewModel @Inject constructor(
     }
 
     fun stopMeasurement() {
-        finishMeasurement(
-            completed = false
-        )
+        finishMeasurement(false)
     }
 
     private fun observePpg() {
@@ -77,26 +76,21 @@ class PpgViewModel @Inject constructor(
                     }
 
                     PpgMeasurementPhase.PROCESSING_WARMUP -> {
-                        ppgSignalProcessor.process(
-                            measurement = measurement
-                        )
+                        ppgSignalProcessor.process(measurement)
                     }
 
                     PpgMeasurementPhase.MEASURING -> {
-                        val processingResults = ppgSignalProcessor.process(
-                            measurement = measurement
-                        )
+                        val processingResults = ppgSignalProcessor.process(measurement)
 
                         rawMeasurements.add(measurement)
 
                         processingResults.forEach { result ->
+                            ppgUseCases.addProcessedSampleToPpgSession(result.measurement)
+                            addChartMeasurement(result.measurement)
+
                             result.peak?.let { peak ->
                                 addChartPeak(peak)
                             }
-
-                            addChartMeasurement(
-                                measurement = result.measurement
-                            )
 
                             result.heartRate?.let { heartRate ->
                                 _state.value = _state.value.copy(
@@ -133,6 +127,7 @@ class PpgViewModel @Inject constructor(
             }
 
             ppgSignalProcessor.resetMeasurementState()
+            ppgUseCases.startPpgSession(System.currentTimeMillis())
 
             _state.value = _state.value.copy(
                 measurementPhase = PpgMeasurementPhase.MEASURING
@@ -154,9 +149,7 @@ class PpgViewModel @Inject constructor(
                 )
 
                 if (remainingTime == 0L) {
-                    finishMeasurement(
-                        completed = true
-                    )
+                    finishMeasurement(true)
                     break
                 }
 
@@ -174,6 +167,7 @@ class PpgViewModel @Inject constructor(
                     cancelMeasurementTimer()
                     cancelBreathingGuidance()
                     rawMeasurements.clear()
+                    ppgUseCases.resetPpgSession()
 
                     _state.value = _state.value.copy(
                         measurementPhase = PpgMeasurementPhase.IDLE,
@@ -192,6 +186,12 @@ class PpgViewModel @Inject constructor(
         ppgUseCases.stopPpgMeasurement()
         cancelMeasurementTimer()
 
+        if (completed) {
+            ppgUseCases.finishPpgSession(System.currentTimeMillis())
+        } else {
+            ppgUseCases.resetPpgSession()
+        }
+
         val measurementsToExport = rawMeasurements.toList()
 
         _state.value = _state.value.copy(
@@ -208,10 +208,7 @@ class PpgViewModel @Inject constructor(
             breathingPhase = null
         )
 
-        exportRawMeasurements(
-            measurements = measurementsToExport
-        )
-
+        exportRawMeasurements(measurementsToExport)
         cancelBreathingGuidance()
     }
 
@@ -236,6 +233,7 @@ class PpgViewModel @Inject constructor(
         ppgUseCases.stopPpgMeasurement()
         cancelMeasurementTimer()
         cancelBreathingGuidance()
+        ppgUseCases.resetPpgSession()
 
         super.onCleared()
     }

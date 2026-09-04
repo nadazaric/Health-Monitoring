@@ -11,7 +11,7 @@ import com.healthmonitoring.wear.feature.ppg.data.session.PpgSessionCollectorImp
 import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcessor
 import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcessorImpl
 import com.healthmonitoring.wear.feature.ppg.domain.repository.PpgRepository
-import com.healthmonitoring.wear.feature.ppg.domain.session.PpgSessionCollector
+import com.healthmonitoring.wear.feature.ppg.data.session.PpgSessionCollector
 import com.healthmonitoring.wear.feature.skin_temperature.data.repository.SkinTemperatureRepositoryImpl
 import com.healthmonitoring.wear.feature.skin_temperature.domain.repository.SkinTemperatureRepository
 import com.healthmonitoring.wear.feature.spo2.data.repository.SpO2RepositoryImpl
