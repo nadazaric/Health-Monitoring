@@ -1,5 +1,6 @@
 package com.healthmonitoring.mobile.feature.skin_temperature.presentation.component
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,11 +24,19 @@ fun SkinTemperatureCard(
         iconDescriptionId = R.string.skin_temperature_description,
         modifier = modifier
     ) {
-        Text(
-            text = getSkinTemperatureText(state),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Column {
+            Text(
+                text = stringResource(R.string.skin_temperature_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = getSkinTemperatureText(state),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 

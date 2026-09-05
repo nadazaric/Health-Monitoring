@@ -7,11 +7,16 @@
     <string name="heart_rate_value">%1$d BPM</string>
 
     <!-- skin temperature -->
-    <string name="skin_temperature_description">Skin Temperature</string>
+    <string name="skin_temperature_description">Skin Temp.</string>
     <string name="skin_temperature_value">%1$.1f °C</string>
 
     <!-- SpO2 -->
     <string name="spo2_description">SpO2</string>
     <string name="spo2_value">%1$d %%</string>
+
+    <!-- PPG -->
+    <string name="ppg_description">PPG</string>
+    <string name="ppg_no_data">No data</string>
+    <string name="ppg_measure_on_watch">Measure on watch</string>
 
 </resources>

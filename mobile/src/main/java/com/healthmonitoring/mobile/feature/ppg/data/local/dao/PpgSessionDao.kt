@@ -4,8 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.healthmonitoring.mobile.feature.ppg.data.local.entity.PpgSessionEntity
 import com.healthmonitoring.mobile.feature.ppg.data.local.entity.PpgSessionSampleEntity
+import com.healthmonitoring.mobile.feature.ppg.data.local.model.PpgSessionWithSamples
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PpgSessionDao {
@@ -50,4 +53,14 @@ interface PpgSessionDao {
         """
     )
     suspend fun getSamples(sessionId: String): List<PpgSessionSampleEntity>
+
+    @Transaction
+    @Query(
+        """
+    SELECT *
+    FROM ppg_sessions
+    ORDER BY startedAt DESC
+    """
+    )
+    fun observeSessions(): Flow<List<PpgSessionWithSamples>>
 }

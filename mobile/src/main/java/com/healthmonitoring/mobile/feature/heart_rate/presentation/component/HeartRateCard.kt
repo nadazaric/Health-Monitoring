@@ -1,5 +1,6 @@
 package com.healthmonitoring.mobile.feature.heart_rate.presentation.component
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -23,11 +24,19 @@ fun HeartRateCard(
         iconDescriptionId = R.string.heart_rate_description,
         modifier = modifier
     ) {
-        Text(
-            text = getHeartRateText(state),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Column {
+            Text(
+                text = stringResource(R.string.heart_rate_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = getHeartRateText(state),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 
