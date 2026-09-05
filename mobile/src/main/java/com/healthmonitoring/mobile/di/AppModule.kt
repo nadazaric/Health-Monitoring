@@ -2,6 +2,8 @@ package com.healthmonitoring.mobile.di
 
 import com.healthmonitoring.mobile.core.datalayer.HealthDataReceiver
 import com.healthmonitoring.mobile.core.datalayer.HealthDataReceiverImpl
+import com.healthmonitoring.mobile.core.datalayer.PpgSessionReceiver
+import com.healthmonitoring.mobile.core.datalayer.PpgSessionReceiverImpl
 import com.healthmonitoring.mobile.feature.heart_rate.data.repository.HeartRateRepositoryImpl
 import com.healthmonitoring.mobile.feature.heart_rate.domain.repository.HeartRateRepository
 import com.healthmonitoring.mobile.feature.skin_temperature.data.repository.SkinTemperatureRepositoryImpl
@@ -43,5 +45,11 @@ abstract class AppModule {
     abstract fun bindHealthDataReceiver(
         healthDataReceiverImpl: HealthDataReceiverImpl
     ): HealthDataReceiver
+
+    @Binds
+    @Singleton
+    abstract fun bindPpgSessionReceiver(
+        ppgSessionReceiverImpl: PpgSessionReceiverImpl
+    ): PpgSessionReceiver
 
 }

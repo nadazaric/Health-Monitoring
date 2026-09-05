@@ -4,6 +4,8 @@ import com.healthmonitoring.wear.core.HealthTrackerProvider
 import com.healthmonitoring.wear.core.HealthTrackerProviderImpl
 import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSender
 import com.healthmonitoring.wear.core.datalayer.HealthDataMessageSenderImpl
+import com.healthmonitoring.wear.core.datalayer.PpgSessionSender
+import com.healthmonitoring.wear.core.datalayer.PpgSessionSenderImpl
 import com.healthmonitoring.wear.feature.heart_rate.data.repository.HeartRateRepositoryImpl
 import com.healthmonitoring.wear.feature.heart_rate.domain.repository.HeartRateRepository
 import com.healthmonitoring.wear.feature.ppg.data.repository.PpgRepositoryImpl
@@ -77,4 +79,9 @@ abstract class HealthTrackingModule {
         healthDataMessageSenderImpl: HealthDataMessageSenderImpl
     ): HealthDataMessageSender
 
+    @Binds
+    @Singleton
+    abstract fun bindPpgSessionSender(
+        ppgSessionSenderImpl: PpgSessionSenderImpl
+    ): PpgSessionSender
 }

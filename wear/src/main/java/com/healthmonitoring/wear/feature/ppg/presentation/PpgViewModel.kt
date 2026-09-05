@@ -5,6 +5,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.healthmonitoring.wear.core.datalayer.PpgSessionSender
 import com.healthmonitoring.wear.feature.ppg.consts.PpgConfig
 import com.healthmonitoring.wear.feature.ppg.data.export.PpgCsvExporter
 import com.healthmonitoring.wear.feature.ppg.domain.enumeration.PpgBreathingPhase
@@ -25,7 +26,8 @@ import com.healthmonitoring.wear.feature.ppg.domain.processing.PpgSignalProcesso
 class PpgViewModel @Inject constructor(
     private val ppgUseCases: PpgUseCases,
     private val ppgSignalProcessor: PpgSignalProcessor,
-    private val ppgCsvExporter: PpgCsvExporter
+    private val ppgCsvExporter: PpgCsvExporter,
+    private val ppgSessionSender: PpgSessionSender
 ) : ViewModel() {
 
     private val _state = mutableStateOf(PpgState())
@@ -187,7 +189,8 @@ class PpgViewModel @Inject constructor(
         cancelMeasurementTimer()
 
         if (completed) {
-            ppgUseCases.finishPpgSession(System.currentTimeMillis())
+            val session = ppgUseCases.finishPpgSession(System.currentTimeMillis())
+            ppgSessionSender.sendSession(session)
         } else {
             ppgUseCases.resetPpgSession()
         }
