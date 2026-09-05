@@ -12,12 +12,20 @@ import com.google.android.gms.wearable.Wearable
 import com.healthmonitoring.mobile.feature.ppg.domain.enumeration.PpgBreathingPhase
 import com.healthmonitoring.mobile.feature.ppg.domain.model.PpgMeasurementSession
 import com.healthmonitoring.mobile.feature.ppg.domain.model.PpgSessionSample
+import com.healthmonitoring.mobile.feature.ppg.domain.repository.PpgSessionRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 @Singleton
 class PpgSessionReceiverImpl @Inject constructor(
-    @param:ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val ppgSessionRepository: PpgSessionRepository
 ) : PpgSessionReceiver {
+
+    private val receiverScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     override fun receiveSession(dataItem: DataItem) {
         val dataMap = DataMapItem.fromDataItem(dataItem).dataMap
@@ -50,6 +58,23 @@ class PpgSessionReceiverImpl @Inject constructor(
                         lastSample=${session.samples.lastOrNull()}
                         """.trimIndent()
                     )
+
+                    receiverScope.launch {
+                        try {
+                            ppgSessionRepository.saveSession(session)
+
+                            Log.d(
+                                Tags.DATA_LAYER,
+                                "PPG session saved: ${session.id}"
+                            )
+                        } catch (exception: Exception) {
+                            Log.e(
+                                Tags.DATA_LAYER,
+                                "Failed to save PPG session.",
+                                exception
+                            )
+                        }
+                    }
                 } catch (exception: Exception) {
                     Log.e(
                         Tags.DATA_LAYER,
